@@ -1,0 +1,8 @@
+# =============================================================================
+# CURRENT_STATE  ->  readable INT variable exposing the active ISA-88 state
+# =============================================================================
+
+:{{ skill.name }}_CURRENT_STATE a opcua:OpcUaVariable , owl:NamedIndividual ;
+    opcua:nodeId "{{ skill.current_state.node_id_str }}" ;
+    opcua:browseName "{{ skill.current_state.browse_name }}" ;
+    rdfs:comment "Read the active ISA-88 state (Idle=1 ... Clearing=17)." .

@@ -1,0 +1,13 @@
+# =============================================================================
+# OPC UA skill interface  ->  UAObject "{{ skill.interface_node.browse_name }}"
+# =============================================================================
+
+:{{ skill.name }}_Interface a opcua:OpcUaSkillInterface , owl:NamedIndividual ;
+    opcua:nodeId "{{ skill.interface_node.node_id_str }}" ;
+    opcua:browseName "{{ skill.interface_node.browse_name }}" ;
+    opcua:exposes :{{ skill.name }} ;
+    com:exposedVia :{{ skill.name }}_Endpoint ;
+    core:hasPart
+        :{{ skill.name }}_SKILL_CMD ,
+        :{{ skill.name }}_CURRENT_STATE{% for v in skill.parameters + skill.outputs %} ,
+        :{{ skill.name }}_Param_{{ v.name }}{% endfor %} .

@@ -1,0 +1,91 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix skill: <https://w3id.org/maestro/skill#> .
+@prefix plc:   <https://w3id.org/maestro/iec61131#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/iec61131> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/iec61131/0.3.0> ;
+    rdfs:label "MAESTRO IEC 61131 Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "PLC execution semantics per IEC 61131-3. Function Blocks implement skills and control resources."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+plc:PLCProgram a owl:Class ;
+    rdfs:label "PLCProgram"@en ;
+    rdfs:subClassOf core:ControlComponent .
+
+plc:Task a owl:Class ;
+    rdfs:label "Task"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plc:FunctionBlock a owl:Class ;
+    rdfs:label "FunctionBlock"@en ;
+    rdfs:subClassOf core:ControlComponent ;
+    rdfs:comment "An IEC 61131-3 Function Block (FB)."@en .
+
+plc:Function a owl:Class ;
+    rdfs:label "Function"@en ;
+    rdfs:subClassOf core:ControlComponent .
+
+plc:Variable a owl:Class ;
+    rdfs:label "Variable"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# IEC 61131-3 LANGUAGES
+#################################################################
+
+plc:Language a owl:Class ;
+    rdfs:label "Language"@en .
+
+plc:LadderLogic a plc:Language ;
+    rdfs:label "Ladder Logic (LD)"@en .
+
+plc:StructuredText a plc:Language ;
+    rdfs:label "Structured Text (ST)"@en .
+
+plc:FunctionBlockDiagram a plc:Language ;
+    rdfs:label "Function Block Diagram (FBD)"@en .
+
+plc:SequentialFunctionChart a plc:Language ;
+    rdfs:label "Sequential Function Chart (SFC)"@en .
+
+plc:InstructionList a plc:Language ;
+    rdfs:label "Instruction List (IL)"@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+plc:implementsSkill a owl:ObjectProperty ;
+    rdfs:label "implementsSkill"@en ;
+    rdfs:domain plc:FunctionBlock ;
+    rdfs:range  core:Skill ;
+    rdfs:subPropertyOf core:implements .
+
+plc:controlsResource a owl:ObjectProperty ;
+    rdfs:label "controlsResource"@en ;
+    rdfs:domain plc:FunctionBlock ;
+    rdfs:range  core:Resource ;
+    rdfs:subPropertyOf core:controls .
+
+plc:writtenIn a owl:ObjectProperty ;
+    rdfs:label "writtenIn"@en ;
+    rdfs:range plc:Language .
+
+plc:cycleTimeMs a owl:DatatypeProperty ;
+    rdfs:label "cycleTimeMs"@en ;
+    rdfs:domain plc:Task ;
+    rdfs:range  xsd:float .

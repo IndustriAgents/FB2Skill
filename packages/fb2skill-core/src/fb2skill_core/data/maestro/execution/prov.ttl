@@ -1,0 +1,63 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:    <https://w3id.org/maestro/core#> .
+@prefix runtime: <https://w3id.org/maestro/runtime#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix mprov:   <https://w3id.org/maestro/prov#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#
+# Bridge module — W3C PROV-O. Turns the runtime layer into a lineage
+# record (Priority 5): runtime:SkillExecution becomes a prov:Activity,
+# and its skill / resource / input / time properties map onto the
+# standard PROV-O properties, giving full traceability for free.
+# Full PROV-O is bundled for reference in references/prov-o.ttl
+# (not imported into the stack, per the import policy).
+#################################################################
+
+<https://w3id.org/maestro/prov> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/prov/0.4.0> ;
+    rdfs:label "MAESTRO Provenance Bridge"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/runtime> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Aligns runtime:SkillExecution to W3C PROV-O so executions carry standard provenance (agents, used entities, generation, time). New in 0.4.0 (HHM-Core Priority 5)."@en .
+
+#################################################################
+# CLASS BRIDGE
+#################################################################
+
+runtime:SkillExecution rdfs:subClassOf prov:Activity .
+
+#################################################################
+# PROPERTY BRIDGES (runtime → PROV-O)
+#################################################################
+
+# All three are object properties, matching the PROV-O parents (prov:used,
+# prov:wasAssociatedWith are owl:ObjectProperty).
+runtime:executes   rdfs:subPropertyOf prov:used .              # Skill consumed by the activity
+runtime:hasInput   rdfs:subPropertyOf prov:used .              # ParameterValue consumed
+runtime:executedOn rdfs:subPropertyOf prov:wasAssociatedWith . # Resource associated with the activity
+
+# Time mapping: prov:atTime / prov:startedAtTime / prov:endedAtTime are
+# owl:DatatypeProperty (-> xsd:dateTime) defined on the Activity, so the
+# OBJECT property runtime:hasTime (-> runtime:TimeInterval) is deliberately
+# NOT made a subproperty of them (that would illegally mix object/datatype
+# property hierarchies). Instead, datatype aliases on the SkillExecution
+# (itself a prov:Activity) carry the PROV timestamps directly.
+mprov:startedAtTime a owl:DatatypeProperty ;
+    rdfs:label "startedAtTime"@en ;
+    rdfs:subPropertyOf prov:startedAtTime ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "Start timestamp of a runtime:SkillExecution, mapped to prov:startedAtTime on the Activity."@en .
+
+mprov:endedAtTime a owl:DatatypeProperty ;
+    rdfs:label "endedAtTime"@en ;
+    rdfs:subPropertyOf prov:endedAtTime ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "End timestamp of a runtime:SkillExecution, mapped to prov:endedAtTime on the Activity."@en .

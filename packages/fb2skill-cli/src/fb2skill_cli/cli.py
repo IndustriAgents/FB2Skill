@@ -3,13 +3,17 @@ import argparse
 import sys
 from pathlib import Path
 
-from fb2skill_core.config import RenderConfig
+from fb2skill_core.config import ONTOLOGIES, RenderConfig
 from fb2skill_core.opcua_nodes import (
     SkillResolutionError,
     load_node_set,
     resolve_bindings,
 )
-from fb2skill_core.project import discover_skill_fbts, find_deployment_opcua_xml
+from fb2skill_core.project import (
+    build_instance_name_index,
+    discover_skill_fbts,
+    find_deployment_opcua_xml,
+)
 from fb2skill_core.render import render_skill
 
 from .config import CliConfig
@@ -18,7 +22,8 @@ from .config import CliConfig
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="fb2skill",
-        description="Convert IEC 61499 function blocks into CaSk/CaSkMan skill TTL files.",
+        description="Convert IEC 61499 function blocks into semantic skill TTL files "
+                    "(CaSk/CaSkMan or MAESTRO vocabulary).",
     )
     p.add_argument("-f", "--project", required=True, type=Path,
                    help="IEC 61499 project root folder")
@@ -37,6 +42,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="OPC UA namespace index to emit in node IDs (default: 2)")
     p.add_argument("--only", default="",
                    help="comma-separated FB-name allowlist (default: all detected skills)")
+    p.add_argument("--ontology", choices=ONTOLOGIES, default="maestro",
+                   help="target ontology vocabulary (default: maestro)")
     p.add_argument("--verify", action="store_true",
                    help="parse each generated TTL with rdflib after writing")
     return p
@@ -69,6 +76,7 @@ def main(argv: list[str] | None = None) -> int:
         project_label=str(project_root),
         source_label=opcua_xml.name,
         only=only,
+        ontology=args.ontology,
     )
     config = CliConfig(
         project_root=project_root,
@@ -87,13 +95,14 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     node_set = load_node_set(opcua_xml, target_ns=render_config.namespace_index)
+    instance_names = build_instance_name_index(project_root)
     config.out_dir.mkdir(parents=True, exist_ok=True)
 
     failures = 0
     verify_failures = 0
     for parsed in parsed_fbts:
         try:
-            skill = resolve_bindings(parsed, node_set)
+            skill = resolve_bindings(parsed, node_set, instance_names)
         except SkillResolutionError as e:
             print(f"skip {parsed.name}: {e}", file=sys.stderr)
             failures += 1

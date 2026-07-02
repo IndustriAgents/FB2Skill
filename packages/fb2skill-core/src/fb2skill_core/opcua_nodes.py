@@ -123,22 +123,40 @@ def _default_for(sk_type: str) -> str:
     return IEC_TYPE_DEFAULT.get(sk_type, "0")
 
 
-def resolve_bindings(parsed: ParsedFbt, ns: NodeSet) -> Skill:
+def resolve_bindings(
+    parsed: ParsedFbt, ns: NodeSet, instance_names: dict[str, str] | None = None
+) -> Skill:
     """Resolve the OPC UA bindings for one skill. Composite FBs with multiple
-    inner SKILL_CMD nodes resolve to the shortest path (most direct child)."""
-    if parsed.name not in ns.skill_objs:
-        raise SkillResolutionError(
-            f"no UAObject with BrowseName={parsed.name!r} found in deployment XML"
-        )
-    interface = ns.skill_objs[parsed.name]
+    inner SKILL_CMD nodes resolve to the shortest path (most direct child).
+
+    The OPC UA deployment exposes an object by the *instance* name it was
+    given in the FBNetwork, not by the skill's *type* name. When the type
+    name isn't found directly, ``instance_names`` (type name -> instance
+    name, from ``project.build_instance_name_index``) is used as a fallback.
+    """
+    browse_name = parsed.name
+    if browse_name not in ns.skill_objs:
+        alt = (instance_names or {}).get(parsed.name)
+        if alt is None:
+            raise SkillResolutionError(
+                f"no UAObject with BrowseName={parsed.name!r} found in deployment XML, "
+                f"and {parsed.name!r} is not instantiated anywhere in the project's FB networks"
+            )
+        if alt not in ns.skill_objs:
+            raise SkillResolutionError(
+                f"skill {parsed.name!r} is instantiated as {alt!r} in the project, "
+                f"but no matching UAObject exists in the deployment XML"
+            )
+        browse_name = alt
+    interface = ns.skill_objs[browse_name]
 
     cmd_paths = [
         p for p in ns.variables
-        if f".{parsed.name}." in p and p.endswith(".IThis.SKILL_CMD")
+        if f".{browse_name}." in p and p.endswith(".IThis.SKILL_CMD")
     ]
     if not cmd_paths:
         raise SkillResolutionError(
-            f"no SKILL_CMD UAVariable found under skill {parsed.name!r}"
+            f"no SKILL_CMD UAVariable found under skill {browse_name!r}"
         )
     primary_prefix = min(cmd_paths, key=lambda p: p.count(".")).rsplit(".", 1)[0]
     # primary_prefix = "PLC1.RES0.skLoad.Skill_Commands.IThis"

@@ -1,0 +1,86 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix skill: <https://w3id.org/maestro/skill#> .
+@prefix aas:   <https://w3id.org/maestro/aas#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/aas> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/aas/0.4.0> ;
+    rdfs:label "MAESTRO AAS Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Asset Administration Shell digital twin structure (Plattform Industrie 4.0). 0.4.0 documents that aas:semanticId resolves into the ECLASS/IEC CDD dictionary; the concrete dictionary alignment is carried in cross-cutting/dpp.ttl (skos:exactMatch to ECLASS IRDIs)."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+aas:AssetAdministrationShell a owl:Class ;
+    rdfs:label "AssetAdministrationShell"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "The digital twin envelope of an Asset."@en .
+
+aas:Asset a owl:Class ;
+    rdfs:label "Asset"@en ;
+    rdfs:subClassOf core:PhysicalEntity .
+
+aas:Submodel a owl:Class ;
+    rdfs:label "Submodel"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+aas:SubmodelElement a owl:Class ;
+    rdfs:label "SubmodelElement"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+aas:Property a owl:Class ;
+    rdfs:label "Property"@en ;
+    rdfs:subClassOf aas:SubmodelElement .
+
+aas:Operation a owl:Class ;
+    rdfs:label "Operation"@en ;
+    rdfs:subClassOf aas:SubmodelElement .
+
+aas:Reference a owl:Class ;
+    rdfs:label "Reference"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+aas:representsAsset a owl:ObjectProperty ;
+    rdfs:label "representsAsset"@en ;
+    rdfs:domain aas:AssetAdministrationShell ;
+    rdfs:range  aas:Asset .
+
+aas:hasSubmodel a owl:ObjectProperty ;
+    rdfs:label "hasSubmodel"@en ;
+    rdfs:domain aas:AssetAdministrationShell ;
+    rdfs:range  aas:Submodel .
+
+aas:hasSubmodelElement a owl:ObjectProperty ;
+    rdfs:label "hasSubmodelElement"@en ;
+    rdfs:domain aas:Submodel ;
+    rdfs:range  aas:SubmodelElement .
+
+aas:publishesInterface a owl:ObjectProperty ;
+    rdfs:label "publishesInterface"@en ;
+    rdfs:domain aas:Submodel ;
+    rdfs:range  skill:SkillInterface ;
+    rdfs:comment "An AAS Submodel publishes a protocol-neutral skill:SkillInterface (HHM-Core SkillInterface published in AAS submodel)."@en .
+
+aas:idShort a owl:DatatypeProperty ;
+    rdfs:label "idShort"@en ;
+    rdfs:range  xsd:string .
+
+aas:semanticId a owl:DatatypeProperty ;
+    rdfs:label "semanticId"@en ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "ECLASS / IEC CDD identifier (IRDI), e.g. '0173-1#02-AAO677#002'. The dictionary alignment that gives these IRDIs meaning is declared in cross-cutting/dpp.ttl via skos:exactMatch from product features/parameters to ECLASS concepts."@en .

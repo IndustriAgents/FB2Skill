@@ -1,0 +1,106 @@
+@prefix rdf:      <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:      <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:     <https://w3id.org/maestro/core#> .
+@prefix skill:    <https://w3id.org/maestro/skill#> .
+@prefix iec61499: <https://w3id.org/maestro/iec61499#> .
+@prefix plc:      <https://w3id.org/maestro/iec61131#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/iec61499> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/iec61499/0.3.0> ;
+    rdfs:label "MAESTRO IEC 61499 Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ,
+                <https://w3id.org/maestro/iec61131> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Event-driven distributed automation per IEC 61499. Function blocks are first-class control components."@en .
+
+#################################################################
+# CLASSES
+#
+# Local names were renamed in 0.3.0 to eliminate collisions with
+# core:Resource and core:Event. The IEC 61499 'Resource' is now
+# iec61499:RuntimeResource; the IEC 61499 'Event' is iec61499:ExecutionEvent.
+#################################################################
+
+iec61499:FunctionBlock a owl:Class ;
+    rdfs:label "IEC 61499 FunctionBlock"@en ;
+    rdfs:subClassOf core:ControlComponent ;
+    owl:disjointWith plc:FunctionBlock ;
+    rdfs:comment "IEC 61499 function block. Disjoint with plc:FunctionBlock (IEC 61131-3 FB) to prevent accidental dual-typing."@en .
+
+iec61499:BasicFB a owl:Class ;
+    rdfs:label "BasicFB"@en ;
+    rdfs:subClassOf iec61499:FunctionBlock ;
+    rdfs:comment "A basic function block defined by an ECC (Execution Control Chart)."@en .
+
+iec61499:CompositeFB a owl:Class ;
+    rdfs:label "CompositeFB"@en ;
+    rdfs:subClassOf iec61499:FunctionBlock ;
+    rdfs:comment "A composite function block built from interconnected FBs."@en .
+
+iec61499:ServiceInterfaceFB a owl:Class ;
+    rdfs:label "ServiceInterfaceFB"@en ;
+    rdfs:subClassOf iec61499:FunctionBlock .
+
+iec61499:Application a owl:Class ;
+    rdfs:label "Application"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+iec61499:RuntimeResource a owl:Class ;
+    rdfs:label "RuntimeResource"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "IEC 61499 runtime resource (formerly iec61499:Resource in 0.2.0). Renamed to avoid collision with core:Resource."@en .
+
+iec61499:Device a owl:Class ;
+    rdfs:label "Device"@en ;
+    rdfs:subClassOf core:Resource ;
+    rdfs:comment "A physical computing device that hosts IEC 61499 RuntimeResources. Subsumed under core:Resource (controller hardware) and aligned with res:ControllerDevice."@en .
+
+iec61499:ExecutionEvent a owl:Class ;
+    rdfs:label "ExecutionEvent"@en ;
+    rdfs:subClassOf core:Event ;
+    rdfs:comment "An IEC 61499 execution event (formerly iec61499:Event in 0.2.0). Renamed to avoid collision with core:Event."@en .
+
+iec61499:Connection a owl:Class ;
+    rdfs:label "Connection"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+iec61499:implementsSkill a owl:ObjectProperty ;
+    rdfs:label "implementsSkill"@en ;
+    rdfs:domain iec61499:FunctionBlock ;
+    rdfs:range  core:Skill ;
+    rdfs:subPropertyOf core:implements .
+
+iec61499:controlsResource a owl:ObjectProperty ;
+    rdfs:label "controlsResource"@en ;
+    rdfs:domain iec61499:FunctionBlock ;
+    rdfs:range  core:Resource ;
+    rdfs:subPropertyOf core:controls .
+
+iec61499:hostsRuntimeResource a owl:ObjectProperty ;
+    rdfs:label "hostsRuntimeResource"@en ;
+    rdfs:domain iec61499:Device ;
+    rdfs:range  iec61499:RuntimeResource ;
+    rdfs:subPropertyOf core:hosts .
+
+iec61499:emitsEvent a owl:ObjectProperty ;
+    rdfs:label "emitsEvent"@en ;
+    rdfs:domain iec61499:FunctionBlock ;
+    rdfs:range  iec61499:ExecutionEvent ;
+    rdfs:subPropertyOf core:emits .
+
+iec61499:consumesEvent a owl:ObjectProperty ;
+    rdfs:label "consumesEvent"@en ;
+    rdfs:domain iec61499:FunctionBlock ;
+    rdfs:range  iec61499:ExecutionEvent ;
+    rdfs:subPropertyOf core:consumes .

@@ -1,0 +1,17 @@
+# =============================================================================
+# Resource and skill
+# =============================================================================
+
+:{{ config.resource }} a core:Resource , owl:NamedIndividual ;
+    core:identifier "{{ config.resource }}" ;
+    core:provides :{{ skill.name }} .
+
+:{{ skill.name }} a core:Skill , owl:NamedIndividual ;
+    rdfs:label "{{ skill.name }}" ;
+    core:identifier "{{ skill.name }}" ;
+{% for v in skill.parameters + skill.outputs %}
+    skill:hasParameterDef :{{ skill.name }}_Param_{{ v.name }} ;
+{% endfor %}
+    skill:hasInterfaceContract :{{ skill.name }}_Interface ;
+    opcua:accessibleThrough :{{ skill.name }}_Interface ;
+    state:hasStateMachine :{{ skill.name }}_StateMachine .

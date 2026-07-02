@@ -1,0 +1,65 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix state: <https://w3id.org/maestro/state#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/state> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/state/0.3.0> ;
+    rdfs:label "MAESTRO State Vocabulary"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Generic state-machine vocabulary used by Skills, Capabilities, and ControlComponents to declare pre-/post-conditions."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+state:StateMachine a owl:Class ;
+    rdfs:label "StateMachine"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+state:Transition a owl:Class ;
+    rdfs:label "Transition"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+state:InitialState a owl:Class ;
+    rdfs:label "InitialState"@en ;
+    rdfs:subClassOf core:State .
+
+state:FinalState a owl:Class ;
+    rdfs:label "FinalState"@en ;
+    rdfs:subClassOf core:State .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+state:hasStateMachine a owl:ObjectProperty ;
+    rdfs:label "hasStateMachine"@en ;
+    rdfs:range state:StateMachine .
+
+state:hasTransition a owl:ObjectProperty ;
+    rdfs:label "hasTransition"@en ;
+    rdfs:domain state:StateMachine ;
+    rdfs:range  state:Transition .
+
+state:source a owl:ObjectProperty ;
+    rdfs:label "source"@en ;
+    rdfs:domain state:Transition ;
+    rdfs:range  core:State .
+
+state:target a owl:ObjectProperty ;
+    rdfs:label "target"@en ;
+    rdfs:domain state:Transition ;
+    rdfs:range  core:State .
+
+state:guardExpression a owl:DatatypeProperty ;
+    rdfs:label "guardExpression"@en ;
+    rdfs:domain state:Transition ;
+    rdfs:range  xsd:string .

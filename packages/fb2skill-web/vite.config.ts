@@ -13,6 +13,7 @@ export default defineConfig({
       "/convert": "http://127.0.0.1:8000",
       "/skills": "http://127.0.0.1:8000",
       "/ontology": "http://127.0.0.1:8000",
+      "/ontologies": "http://127.0.0.1:8000",
       "/openapi.json": "http://127.0.0.1:8000",
     },
   },

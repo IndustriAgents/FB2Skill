@@ -1,0 +1,70 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix reas:  <https://w3id.org/maestro/reasoning#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/reasoning> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/reasoning/0.3.0> ;
+    rdfs:label "MAESTRO Reasoning Documentation Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Documents the multi-layer reasoning model used by MAESTRO. Holds named individuals describing reasoning layers and the canonical reasoning chain."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+reas:ReasoningLayer a owl:Class ;
+    rdfs:label "ReasoningLayer"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+reas:ReasoningModel a owl:Class ;
+    rdfs:label "ReasoningModel"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# LAYERS (mirrors README section 18)
+#################################################################
+
+reas:SemanticInheritance a reas:ReasoningLayer ;
+    rdfs:label "Semantic Inheritance"@en ;
+    reas:technology "OWL2-RL" .
+
+reas:Validation a reas:ReasoningLayer ;
+    rdfs:label "Validation"@en ;
+    reas:technology "SHACL" .
+
+reas:CapabilityInference a reas:ReasoningLayer ;
+    rdfs:label "Capability Inference"@en ;
+    reas:technology "SPARQL CONSTRUCT" .
+
+reas:Orchestration a reas:ReasoningLayer ;
+    rdfs:label "Orchestration"@en ;
+    reas:technology "SPARQL" .
+
+reas:Explanation a reas:ReasoningLayer ;
+    rdfs:label "Explanation"@en ;
+    reas:technology "LLM" .
+
+#################################################################
+# CANONICAL REASONING CHAIN (mirrors README section 19)
+#################################################################
+
+reas:CoreReasoningChain a reas:ReasoningModel ;
+    rdfs:label "MAESTRO Core Reasoning Chain"@en ;
+    rdfs:comment "Product →’ requires →’ Process →’ requires →’ Capability →’ realizedBy →’ Skill →’ implementedBy →’ ControlComponent →’ controls →’ Resource →’ performs →’ Motion."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+reas:technology a owl:DatatypeProperty ;
+    rdfs:label "technology"@en ;
+    rdfs:domain reas:ReasoningLayer ;
+    rdfs:range  xsd:string .

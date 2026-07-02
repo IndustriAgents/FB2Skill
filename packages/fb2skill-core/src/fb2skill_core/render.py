@@ -16,7 +16,7 @@ _ENV = Environment(
 
 
 def render_skill(skill: Skill, config: RenderConfig) -> str:
-    template = _ENV.get_template("skill.ttl.j2")
+    template = _ENV.get_template(f"{config.ontology}/skill.ttl.j2")
     return template.render(
         skill=skill,
         config=config,
@@ -28,4 +28,5 @@ def render_skill(skill: Skill, config: RenderConfig) -> str:
         command_target=sm.COMMAND_TARGET,
         auto_target=sm.AUTO_TARGET,
         state_outgoing=sm.STATE_OUTGOING,
+        sk_type_xsd=sm.SK_TYPE_XSD,
     )

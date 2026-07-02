@@ -1,6 +1,7 @@
 import type {
   ConvertRequestFields,
   ConvertResponse,
+  OntologiesResponse,
   SkillListResponse,
 } from "../types/api";
 
@@ -54,6 +55,7 @@ export async function convertProject(
   fd.append("namespace_index", String(fields.namespace_index ?? 2));
   if (fields.only) fd.append("only", fields.only);
   if (fields.opcua_xml_rel_path) fd.append("opcua_xml_rel_path", fields.opcua_xml_rel_path);
+  fd.append("ontology", fields.ontology ?? "maestro");
   return unwrap(
     await fetch(`${apiBase}/convert`, { method: "POST", body: fd })
   );
@@ -61,6 +63,19 @@ export async function convertProject(
 
 export async function fetchOntology(): Promise<string> {
   const res = await fetch(`${apiBase}/ontology`);
+  if (!res.ok) throw new ApiError(res.status, res.statusText);
+  return res.text();
+}
+
+export async function fetchOntologies(): Promise<OntologiesResponse> {
+  return unwrap(await fetch(`${apiBase}/ontologies`));
+}
+
+export async function fetchOntologyFile(
+  ontologyId: string,
+  path: string
+): Promise<string> {
+  const res = await fetch(`${apiBase}/ontologies/${ontologyId}/files/${path}`);
   if (!res.ok) throw new ApiError(res.status, res.statusText);
   return res.text();
 }

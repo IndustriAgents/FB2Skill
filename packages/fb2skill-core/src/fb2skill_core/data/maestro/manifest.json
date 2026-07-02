@@ -1,0 +1,86 @@
+{
+  "id": "maestro",
+  "label": "MAESTRO",
+  "version": "0.4.0",
+  "license": "MIT",
+  "baseIri": "https://w3id.org/maestro",
+  "source": "Snapshot of C:\\Users\\melxav\\Documents\\Skills\\MAESTRO (2026-07-02)",
+  "groups": [
+    { "id": "umbrella", "label": "Umbrella", "files": ["maestro.ttl"] },
+    { "id": "core", "label": "Core", "files": ["core/manufacturing-core.ttl"] },
+    {
+      "id": "logical",
+      "label": "Logical",
+      "files": [
+        "logical/skill.ttl",
+        "logical/capability.ttl",
+        "logical/process.ttl",
+        "logical/product.ttl",
+        "logical/recipe.ttl"
+      ]
+    },
+    {
+      "id": "physical",
+      "label": "Physical",
+      "files": [
+        "physical/resource.ttl",
+        "physical/motion.ttl",
+        "physical/automationml.ttl"
+      ]
+    },
+    {
+      "id": "execution",
+      "label": "Execution",
+      "files": [
+        "execution/opcua.ttl",
+        "execution/iec61499.ttl",
+        "execution/iec61131.ttl",
+        "execution/ros.ttl",
+        "execution/aas.ttl",
+        "execution/dtdl.ttl",
+        "execution/prov.ttl",
+        "execution/trace.ttl"
+      ]
+    },
+    {
+      "id": "runtime",
+      "label": "Runtime",
+      "files": ["runtime/runtime.ttl", "runtime/state.ttl"]
+    },
+    {
+      "id": "cross-cutting",
+      "label": "Cross-cutting",
+      "files": [
+        "cross-cutting/communication.ttl",
+        "cross-cutting/unit.ttl",
+        "cross-cutting/sensor.ttl",
+        "cross-cutting/safety.ttl",
+        "cross-cutting/policy.ttl",
+        "cross-cutting/quality.ttl",
+        "cross-cutting/maintenance.ttl",
+        "cross-cutting/energy.ttl",
+        "cross-cutting/dpp.ttl"
+      ]
+    },
+    {
+      "id": "reasoning",
+      "label": "Reasoning",
+      "files": ["reasoning/reasoning.ttl", "reasoning/planning.ttl"]
+    },
+    {
+      "id": "lib",
+      "label": "Library",
+      "files": ["lib/skill-lib.ttl", "lib/motion-lib.ttl"]
+    },
+    {
+      "id": "references",
+      "label": "References",
+      "files": [
+        "references/caskman.ttl",
+        "references/odrl22.ttl",
+        "references/prov-o.ttl",
+        "references/saref4inma.ttl"
+      ]
+    }
+  ]
+}

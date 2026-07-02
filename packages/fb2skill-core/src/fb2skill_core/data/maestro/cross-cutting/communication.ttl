@@ -1,0 +1,131 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix skill: <https://w3id.org/maestro/skill#> .
+@prefix com:   <https://w3id.org/maestro/communication#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/communication> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/communication/0.4.0> ;
+    rdfs:label "MAESTRO Communication Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Industrial communication protocols and endpoints (OPC UA, DDS, MQTT, Profinet, EtherCAT, …). 0.4.0 adds a neutral com:Binding indirection, com:OperationSignature and com:EventStream so invocation contracts are protocol-agnostic (HHM-Core Priority 6)."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+com:Protocol a owl:Class ;
+    rdfs:label "Protocol"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+com:OpcUaProtocol      a com:Protocol ; rdfs:label "OPC UA"@en .
+com:DdsProtocol        a com:Protocol ; rdfs:label "DDS"@en .
+com:MqttProtocol       a com:Protocol ; rdfs:label "MQTT"@en .
+com:ProfinetProtocol   a com:Protocol ; rdfs:label "Profinet"@en .
+com:EthercatProtocol   a com:Protocol ; rdfs:label "EtherCAT"@en .
+com:ModbusProtocol     a com:Protocol ; rdfs:label "Modbus"@en .
+com:HttpProtocol       a com:Protocol ; rdfs:label "HTTP/REST"@en .
+com:DtdlProtocol       a com:Protocol ; rdfs:label "DTDL (Azure Digital Twins)"@en .
+
+com:Channel a owl:Class ;
+    rdfs:label "Channel"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A bidirectional communication channel using a Protocol."@en .
+
+com:Endpoint a owl:Class ;
+    rdfs:label "Endpoint"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+com:usesProtocol a owl:ObjectProperty ;
+    rdfs:domain core:LogicalEntity ;
+    rdfs:range  com:Protocol ;
+    rdfs:comment "Relates a Channel or an Endpoint to the Protocol it uses (HHM-Core Endpoint usesProtocol Protocol). Domain kept general so both Channel and Endpoint may use it."@en .
+
+com:hasEndpoint a owl:ObjectProperty ;
+    rdfs:domain com:Channel ;
+    rdfs:range  com:Endpoint .
+
+com:address a owl:DatatypeProperty ;
+    rdfs:domain com:Endpoint ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "URI/URL of the endpoint (e.g. 'opc.tcp://plc1:4840')."@en .
+
+com:port a owl:DatatypeProperty ;
+    rdfs:domain com:Endpoint ;
+    rdfs:range  xsd:integer .
+
+#################################################################
+# NEUTRAL BINDING / SIGNATURE / EVENT-STREAM (new 0.4.0, HHM-Core P6)
+#
+# HHM-Core inserts a Binding indirection between a SkillInterface and a
+# concrete protocol, an OperationSignature (params/returns) and an
+# EventStream contract. Concrete adapters specialise com:Binding.
+#################################################################
+
+com:Binding a owl:Class ;
+    rdfs:label "Binding"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A neutral protocol-mapping indirection between an Endpoint/interface and a concrete protocol (OPC UA, REST, DTDL, …). Mirrors HHM-Core Binding."@en .
+
+com:OperationSignature a owl:Class ;
+    rdfs:label "OperationSignature"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "The parameter/return schema of an invocable operation. Mirrors HHM-Core OperationSignature."@en .
+
+com:EventStream a owl:Class ;
+    rdfs:label "EventStream"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A skill-level event/telemetry stream contract (maps to DTDL Telemetry, OPC UA events)."@en .
+
+com:hasBinding a owl:ObjectProperty ;
+    rdfs:label "hasBinding"@en ;
+    rdfs:domain com:Endpoint ;
+    rdfs:range  com:Binding ;
+    rdfs:comment "An Endpoint is realised by a protocol Binding."@en .
+
+com:exposedVia a owl:ObjectProperty ;
+    rdfs:label "exposedVia"@en ;
+    rdfs:domain skill:SkillInterface ;
+    rdfs:range  com:Endpoint ;
+    rdfs:comment "A protocol-neutral skill:SkillInterface is exposed to clients via a communication Endpoint (HHM-Core SkillInterface exposedVia Endpoint). Declared here so skill.ttl need not depend on communication.ttl."@en .
+
+com:bindsEndpoint a owl:ObjectProperty ;
+    rdfs:label "bindsEndpoint"@en ;
+    rdfs:domain com:Binding ;
+    rdfs:range  com:Endpoint .
+
+com:specializesAs a owl:ObjectProperty ;
+    rdfs:label "specializesAs"@en ;
+    rdfs:domain com:Binding ;
+    rdfs:range  com:Protocol ;
+    rdfs:comment "The concrete Protocol a Binding specialises to."@en .
+
+com:hasSignature a owl:ObjectProperty ;
+    rdfs:label "hasSignature"@en ;
+    rdfs:domain com:Binding ;
+    rdfs:range  com:OperationSignature ;
+    rdfs:comment "The OperationSignature exposed by a Binding."@en .
+
+com:hasParameterDef a owl:ObjectProperty ;
+    rdfs:label "hasParameterDef"@en ;
+    rdfs:domain com:OperationSignature ;
+    rdfs:range  skill:ParameterDef ;
+    rdfs:comment "An input parameter of an operation signature (reuses skill:ParameterDef)."@en .
+
+com:returns a owl:ObjectProperty ;
+    rdfs:label "returns"@en ;
+    rdfs:domain com:OperationSignature ;
+    rdfs:range  skill:ParameterDef ;
+    rdfs:comment "A return value of an operation signature."@en .

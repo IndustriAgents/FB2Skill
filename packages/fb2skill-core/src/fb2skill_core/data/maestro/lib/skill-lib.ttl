@@ -1,0 +1,52 @@
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix core:       <https://w3id.org/maestro/core#> .
+@prefix skill:      <https://w3id.org/maestro/skill#> .
+@prefix motion-lib: <https://w3id.org/maestro/motion-lib#> .
+@prefix skill-lib:  <https://w3id.org/maestro/skill-lib#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/skill-lib> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/skill-lib/0.3.0> ;
+    rdfs:label "MAESTRO Skill Library"@en ;
+    owl:imports <https://w3id.org/maestro/skill> ,
+                <https://w3id.org/maestro/motion-lib> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Reusable skill specification individuals. The vocabulary (classes/properties) lives in skill.ttl; library individuals live here so applications and example data can reference stable, citable skill IRIs without colliding with class IRIs in the skill: namespace. New in 0.3.0."@en .
+
+#################################################################
+# ATOMIC SKILLS
+#################################################################
+
+skill-lib:MoveLinear a skill:MotionSkill ;
+    rdfs:label "MoveLinear"@en ;
+    skill:requiresMotion motion-lib:LinearMotionSpec ;
+    rdfs:comment "Move the controlled point along a straight line at constant velocity."@en .
+
+skill-lib:MoveJoint a skill:MotionSkill ;
+    rdfs:label "MoveJoint"@en ;
+    skill:requiresMotion motion-lib:JointMotionSpec ;
+    rdfs:comment "Move the controlled point through configured joint space waypoints."@en .
+
+skill-lib:VacuumPick a skill:ManipulationSkill ;
+    rdfs:label "VacuumPick"@en ;
+    rdfs:comment "Activate vacuum, lower onto part, lift."@en .
+
+skill-lib:Release a skill:ManipulationSkill ;
+    rdfs:label "Release"@en ;
+    rdfs:comment "Release a held part by deactivating the holding mechanism (e.g. vacuum off, gripper open)."@en .
+
+#################################################################
+# COMPOSITE SKILLS
+#################################################################
+
+skill-lib:Transfer a skill:TransferSkill ;
+    rdfs:label "Transfer"@en ;
+    skill:composedOfSkill skill-lib:MoveLinear ,
+                          skill-lib:VacuumPick ,
+                          skill-lib:Release ;
+    rdfs:comment "Composite pick-and-place skill — moves a part from A to B."@en .

@@ -1,0 +1,205 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:    <https://w3id.org/maestro/core#> .
+@prefix skill:   <https://w3id.org/maestro/skill#> .
+@prefix com:     <https://w3id.org/maestro/communication#> .
+@prefix runtime: <https://w3id.org/maestro/runtime#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/runtime> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/runtime/0.4.0> ;
+    rdfs:label "MAESTRO Runtime Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ,
+                <https://w3id.org/maestro/communication> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Live operational state. PackML-aligned state values are modeled as canonical individuals of core:State. 0.4.0 adds a runtime:SkillExecution record and runtime:TimeInterval — the subject HHM-Core needs for execution provenance (Priority 5). PROV-O and SAREF4INMA bridges live in execution/prov.ttl and execution/trace.ttl."@en .
+
+#################################################################
+# OPERATIONAL STATE VALUES
+#################################################################
+
+runtime:StateScheme a skos:ConceptScheme ;
+    rdfs:label "MAESTRO Runtime State Scheme"@en .
+
+runtime:Available a core:State , skos:Concept ;
+    rdfs:label "Available"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Available"@en ;
+    rdfs:comment "Resource is ready to accept work."@en .
+
+runtime:Busy a core:State , skos:Concept ;
+    rdfs:label "Busy"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Busy"@en ;
+    rdfs:comment "Resource is currently executing a skill."@en .
+
+runtime:Idle a core:State , skos:Concept ;
+    rdfs:label "Idle"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Idle"@en .
+
+runtime:Executing a core:State , skos:Concept ;
+    rdfs:label "Executing"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:broader runtime:Busy ;
+    skos:prefLabel "Executing"@en ;
+    rdfs:comment "PackML 'Execute' substate."@en .
+
+runtime:Held a core:State , skos:Concept ;
+    rdfs:label "Held"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Held"@en ;
+    rdfs:comment "PackML 'Held' state: execution paused."@en .
+
+runtime:Aborted a core:State , skos:Concept ;
+    rdfs:label "Aborted"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Aborted"@en .
+
+runtime:Fault a core:State , skos:Concept ;
+    rdfs:label "Fault"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Fault"@en ;
+    rdfs:comment "Resource is in a faulted or error state."@en .
+
+runtime:Alarm a core:State , skos:Concept ;
+    rdfs:label "Alarm"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Alarm"@en .
+
+runtime:HealthState a core:State , skos:Concept ;
+    rdfs:label "HealthState"@en ;
+    skos:inScheme runtime:StateScheme ;
+    skos:prefLabel "Health state"@en ;
+    rdfs:comment "Diagnostic health indicator such as healthy, degraded, or failed."@en .
+
+#################################################################
+# RUNTIME EVENTS
+#################################################################
+
+runtime:RuntimeEvent a owl:Class ;
+    rdfs:label "RuntimeEvent"@en ;
+    rdfs:subClassOf core:Event .
+
+runtime:StateTransition a owl:Class ;
+    rdfs:label "StateTransition"@en ;
+    rdfs:subClassOf runtime:RuntimeEvent .
+
+#################################################################
+# RUNTIME SNAPSHOT
+#
+# Marker class for an ontology / named graph that carries runtime
+# triples (typically core:hasState assertions). SHACL shapes that
+# enforce "every Resource MUST have a state" target Resources
+# referenced from a runtime:Snapshot rather than every Resource in
+# the graph union, so design-time loads do not falsely fail.
+#################################################################
+
+runtime:Snapshot a owl:Class ;
+    rdfs:label "Snapshot"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "Marker class for a runtime snapshot ontology / named graph. New in 0.3.0."@en .
+
+runtime:snapshotTaken a owl:DatatypeProperty ;
+    rdfs:label "snapshotTaken"@en ;
+    rdfs:domain runtime:Snapshot ;
+    rdfs:range  xsd:dateTime ;
+    rdfs:comment "Wall-clock timestamp at which the snapshot was captured."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+runtime:timestamp a owl:DatatypeProperty ;
+    rdfs:label "timestamp"@en ;
+    rdfs:domain runtime:RuntimeEvent ;
+    rdfs:range  xsd:dateTime .
+
+runtime:enteredState a owl:ObjectProperty ;
+    rdfs:label "enteredState"@en ;
+    rdfs:domain runtime:StateTransition ;
+    rdfs:range  core:State .
+
+runtime:fromState a owl:ObjectProperty ;
+    rdfs:label "fromState"@en ;
+    rdfs:domain runtime:StateTransition ;
+    rdfs:range  core:State .
+
+#################################################################
+# SKILL EXECUTION RECORD (new 0.4.0, HHM-Core P5)
+#
+# A runtime:SkillExecution links the Skill that ran, the Resource it
+# ran on, the inputs supplied, the status reached, the endpoint it was
+# invoked through, faults raised and the time interval. execution/prov.ttl
+# declares it a prov:Activity and maps these properties to PROV-O;
+# execution/trace.ttl maps produced items to SAREF4INMA.
+#################################################################
+
+runtime:SkillExecution a owl:Class ;
+    rdfs:label "SkillExecution"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A record of one execution of a Skill on a Resource: its inputs, status, invocation endpoint, faults and time interval. Mirrors HHM-Core SkillExecution; aligned to prov:Activity in execution/prov.ttl."@en .
+
+runtime:TimeInterval a owl:Class ;
+    rdfs:label "TimeInterval"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A start/end time interval. Complements the instant-only runtime:timestamp."@en .
+
+runtime:executes a owl:ObjectProperty ;
+    rdfs:label "executes"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  core:Skill ;
+    rdfs:comment "The Skill that this execution ran."@en .
+
+runtime:executedOn a owl:ObjectProperty ;
+    rdfs:label "executedOn"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  core:Resource ;
+    rdfs:comment "The Resource the Skill ran on."@en .
+
+runtime:hasInput a owl:ObjectProperty ;
+    rdfs:label "hasInput"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  skill:ParameterValue ;
+    rdfs:comment "A ParameterValue supplied to this execution."@en .
+
+runtime:hasStatus a owl:ObjectProperty ;
+    rdfs:label "hasStatus"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  core:State ;
+    rdfs:comment "The execution status, drawn from the runtime state vocabulary (Executing/Held/Aborted/…)."@en .
+
+runtime:invokedVia a owl:ObjectProperty ;
+    rdfs:label "invokedVia"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  com:Endpoint ;
+    rdfs:comment "The communication Endpoint through which the execution was invoked."@en .
+
+runtime:mayRaise a owl:ObjectProperty ;
+    rdfs:label "mayRaise"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  core:State ;
+    rdfs:comment "A fault state (e.g. runtime:Fault) raised during the execution."@en .
+
+runtime:hasTime a owl:ObjectProperty ;
+    rdfs:label "hasTime"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  runtime:TimeInterval ;
+    rdfs:comment "The time interval over which the execution ran."@en .
+
+runtime:startTime a owl:DatatypeProperty ;
+    rdfs:label "startTime"@en ;
+    rdfs:domain runtime:TimeInterval ;
+    rdfs:range  xsd:dateTime .
+
+runtime:endTime a owl:DatatypeProperty ;
+    rdfs:label "endTime"@en ;
+    rdfs:domain runtime:TimeInterval ;
+    rdfs:range  xsd:dateTime .

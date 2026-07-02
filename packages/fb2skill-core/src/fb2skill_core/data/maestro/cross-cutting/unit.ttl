@@ -1,0 +1,71 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix core: <https://w3id.org/maestro/core#> .
+@prefix qudt:     <http://qudt.org/schema/qudt/> .
+@prefix qudt-unit: <http://qudt.org/vocab/unit/> .
+@prefix unit:     <https://w3id.org/maestro/unit#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/unit> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/unit/0.3.0> ;
+    rdfs:label "MAESTRO Unit Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Physical units aligned with QUDT."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+unit:Unit a owl:Class ;
+    rdfs:label "Unit"@en ;
+    rdfs:subClassOf core:LogicalEntity ,
+                    qudt:Unit .
+
+unit:Quantity a owl:Class ;
+    rdfs:label "Quantity"@en ;
+    rdfs:subClassOf core:LogicalEntity ,
+                    qudt:Quantity .
+
+#################################################################
+# COMMON SI BASE & DERIVED UNITS
+#################################################################
+
+# Each unit is owl:sameAs the corresponding QUDT unit individual so that
+# federated graphs with QUDT-native data can be joined without bridge rules.
+
+unit:Metre          a unit:Unit ; rdfs:label "metre"@en          ; unit:symbol "m"   ; owl:sameAs qudt-unit:M       .
+unit:Millimetre     a unit:Unit ; rdfs:label "millimetre"@en     ; unit:symbol "mm"  ; owl:sameAs qudt-unit:MilliM  .
+unit:Second         a unit:Unit ; rdfs:label "second"@en         ; unit:symbol "s"   ; owl:sameAs qudt-unit:SEC     .
+unit:Kilogram       a unit:Unit ; rdfs:label "kilogram"@en       ; unit:symbol "kg"  ; owl:sameAs qudt-unit:KiloGM  .
+unit:Newton         a unit:Unit ; rdfs:label "newton"@en         ; unit:symbol "N"   ; owl:sameAs qudt-unit:N       .
+unit:Pascal         a unit:Unit ; rdfs:label "pascal"@en         ; unit:symbol "Pa"  ; owl:sameAs qudt-unit:PA      .
+unit:Watt           a unit:Unit ; rdfs:label "watt"@en           ; unit:symbol "W"   ; owl:sameAs qudt-unit:W       .
+unit:Joule          a unit:Unit ; rdfs:label "joule"@en          ; unit:symbol "J"   ; owl:sameAs qudt-unit:J       .
+unit:Kelvin         a unit:Unit ; rdfs:label "kelvin"@en         ; unit:symbol "K"   ; owl:sameAs qudt-unit:K       .
+unit:DegreeCelsius  a unit:Unit ; rdfs:label "degree Celsius"@en ; unit:symbol "°C"  ; owl:sameAs qudt-unit:DEG_C   .
+unit:MetrePerSecond a unit:Unit ; rdfs:label "metre per second"@en ; unit:symbol "m/s" ; owl:sameAs qudt-unit:M-PER-SEC .
+unit:Radian         a unit:Unit ; rdfs:label "radian"@en         ; unit:symbol "rad" ; owl:sameAs qudt-unit:RAD     .
+unit:Degree         a unit:Unit ; rdfs:label "degree"@en         ; unit:symbol "°"   ; owl:sameAs qudt-unit:DEG     .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+unit:symbol a owl:DatatypeProperty ;
+    rdfs:label "symbol"@en ;
+    rdfs:domain unit:Unit ;
+    rdfs:range  xsd:string .
+
+unit:hasUnit a owl:ObjectProperty ;
+    rdfs:label "hasUnit"@en ;
+    rdfs:range  unit:Unit .
+
+unit:numericValue a owl:DatatypeProperty ;
+    rdfs:label "numericValue"@en ;
+    rdfs:range  xsd:double .

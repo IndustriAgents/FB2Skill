@@ -28,4 +28,25 @@ export interface ConvertRequestFields {
   namespace_index?: number;
   only?: string;
   opcua_xml_rel_path?: string;
+  ontology?: string;
+}
+
+export interface OntologyGroup {
+  id: string;
+  label: string;
+  files: string[];
+}
+
+export interface OntologyInfo {
+  id: string;
+  label: string;
+  version: string;
+  license?: string | null;
+  baseIri?: string | null;
+  source?: string | null;
+  groups: OntologyGroup[];
+}
+
+export interface OntologiesResponse {
+  ontologies: OntologyInfo[];
 }

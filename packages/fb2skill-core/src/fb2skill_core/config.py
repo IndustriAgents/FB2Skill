@@ -6,6 +6,10 @@ template needs to render a TTL.
 """
 from dataclasses import dataclass
 
+# Target ontology vocabularies a skill can be rendered into. Each id has a
+# matching template set under ``templates/<id>/skill.ttl.j2``.
+ONTOLOGIES: tuple[str, ...] = ("caskman", "maestro")
+
 
 @dataclass(frozen=True)
 class RenderConfig:
@@ -19,3 +23,11 @@ class RenderConfig:
     project_label: str = ""
     source_label: str = ""
     only: tuple[str, ...] = ()
+    # Target ontology vocabulary; selects the Jinja template set.
+    ontology: str = "maestro"
+
+    def __post_init__(self) -> None:
+        if self.ontology not in ONTOLOGIES:
+            raise ValueError(
+                f"unknown ontology {self.ontology!r}; expected one of {ONTOLOGIES}"
+            )

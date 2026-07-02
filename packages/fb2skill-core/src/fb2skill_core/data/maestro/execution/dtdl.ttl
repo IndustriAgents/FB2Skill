@@ -1,0 +1,73 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix skill: <https://w3id.org/maestro/skill#> .
+@prefix com:   <https://w3id.org/maestro/communication#> .
+@prefix dtdl:  <https://w3id.org/maestro/dtdl#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#
+# Bridge module — DTDL (Azure Digital Twins Definition Language).
+# Completes the invocation set alongside OPC UA, ROS and AAS
+# (Priority 6) by mapping the neutral skill interface to DTDL
+# Interfaces, Telemetry and Commands.
+#
+# DTDL is a JSON-LD vocabulary (dtmi: identifiers), not an OWL
+# ontology, so these dtdl: classes are MAESTRO-local mirrors that
+# specialise the protocol-neutral skill:SkillInterface / com: contracts.
+#################################################################
+
+<https://w3id.org/maestro/dtdl> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/dtdl/0.4.0> ;
+    rdfs:label "MAESTRO DTDL Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ,
+                <https://w3id.org/maestro/communication> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Azure Digital Twins DTDL mirror: Interface / Telemetry / Command / Property mapped onto MAESTRO's neutral skill interface and communication contracts. New in 0.4.0 (HHM-Core Priority 6)."@en .
+
+#################################################################
+# CLASSES (DTDL model)
+#################################################################
+
+dtdl:Interface a owl:Class ;
+    rdfs:label "Interface"@en ;
+    rdfs:subClassOf skill:SkillInterface ;
+    rdfs:comment "A DTDL Interface — the digital-twin realisation of a protocol-neutral skill:SkillInterface."@en .
+
+dtdl:Command a owl:Class ;
+    rdfs:label "Command"@en ;
+    rdfs:subClassOf com:OperationSignature ;
+    rdfs:comment "A DTDL Command — maps to a skill operation (an OperationSignature)."@en .
+
+dtdl:Telemetry a owl:Class ;
+    rdfs:label "Telemetry"@en ;
+    rdfs:subClassOf com:EventStream ;
+    rdfs:comment "A DTDL Telemetry channel — maps to a com:EventStream."@en .
+
+dtdl:Property a owl:Class ;
+    rdfs:label "Property"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A DTDL Property — a readable/writable twin property."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+dtdl:hasCommand a owl:ObjectProperty ;
+    rdfs:label "hasCommand"@en ;
+    rdfs:domain dtdl:Interface ;
+    rdfs:range  dtdl:Command .
+
+dtdl:hasTelemetry a owl:ObjectProperty ;
+    rdfs:label "hasTelemetry"@en ;
+    rdfs:domain dtdl:Interface ;
+    rdfs:range  dtdl:Telemetry .
+
+dtdl:hasProperty a owl:ObjectProperty ;
+    rdfs:label "hasProperty"@en ;
+    rdfs:domain dtdl:Interface ;
+    rdfs:range  dtdl:Property .

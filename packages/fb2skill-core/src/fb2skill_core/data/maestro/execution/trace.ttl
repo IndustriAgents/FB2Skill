@@ -1,0 +1,72 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:    <https://w3id.org/maestro/core#> .
+@prefix runtime: <https://w3id.org/maestro/runtime#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix s4inma:  <https://saref.etsi.org/saref4inma/> .
+@prefix trace:   <https://w3id.org/maestro/trace#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#
+# Bridge module — SAREF4INMA (ETSI). Complements PROV-O with the
+# industrial-manufacturing extension of SAREF, covering batch / item /
+# equipment genealogy (Priority 5). Each runtime:SkillExecution can
+# emit trace events tied to the produced item and equipment used.
+# Full SAREF4INMA is bundled for reference in references/saref4inma.ttl
+# (not imported into the stack, per the import policy).
+#################################################################
+
+<https://w3id.org/maestro/trace> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/trace/0.4.0> ;
+    rdfs:label "MAESTRO Traceability Bridge"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/runtime> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Batch/item/equipment traceability aligned to ETSI SAREF4INMA. Links runtime:SkillExecution to produced items and used equipment. New in 0.4.0 (HHM-Core Priority 5)."@en .
+
+#################################################################
+# CLASSES (SAREF4INMA alignment)
+#################################################################
+
+trace:Item a owl:Class ;
+    rdfs:label "Item"@en ;
+    rdfs:subClassOf core:PhysicalEntity ,
+                    s4inma:Item ;
+    rdfs:comment "A produced item / unit. Subclass of saref4inma:Item."@en .
+
+trace:Batch a owl:Class ;
+    rdfs:label "Batch"@en ;
+    rdfs:subClassOf core:LogicalEntity ,
+                    s4inma:Batch ;
+    rdfs:comment "A production batch grouping items. Subclass of saref4inma:Batch."@en .
+
+trace:TraceEvent a owl:Class ;
+    rdfs:label "TraceEvent"@en ;
+    rdfs:subClassOf core:Event ;
+    rdfs:comment "A traceability event emitted during execution (genealogy record)."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+trace:producedItem a owl:ObjectProperty ;
+    rdfs:label "producedItem"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  trace:Item ;
+    rdfs:subPropertyOf prov:generated ;
+    rdfs:comment "The Item produced by a SkillExecution (HHM-Core SkillExecution traceability). Also a PROV generation edge."@en .
+
+trace:partOfBatch a owl:ObjectProperty ;
+    rdfs:label "partOfBatch"@en ;
+    rdfs:domain trace:Item ;
+    rdfs:range  trace:Batch ;
+    rdfs:comment "An Item belongs to a production Batch."@en .
+
+trace:usedEquipment a owl:ObjectProperty ;
+    rdfs:label "usedEquipment"@en ;
+    rdfs:domain runtime:SkillExecution ;
+    rdfs:range  core:Resource ;
+    rdfs:comment "Equipment (Resource) used by a SkillExecution, for genealogy."@en .

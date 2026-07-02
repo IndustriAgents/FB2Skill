@@ -1,0 +1,33 @@
+@prefix rdf:        <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:        <http://www.w3.org/2002/07/owl#> .
+@prefix core:       <https://w3id.org/maestro/core#> .
+@prefix motion:     <https://w3id.org/maestro/motion#> .
+@prefix motion-lib: <https://w3id.org/maestro/motion-lib#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/motion-lib> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/motion-lib/0.3.0> ;
+    rdfs:label "MAESTRO Motion Library"@en ;
+    owl:imports <https://w3id.org/maestro/motion> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Reusable motion specification individuals. The vocabulary (classes/properties) lives in motion.ttl; library individuals live here so application data and example data can reference stable IRIs without colliding with class names. New in 0.3.0."@en .
+
+#################################################################
+# CANONICAL MOTION SPECIFICATIONS
+#################################################################
+
+motion-lib:LinearMotionSpec a motion:LinearMotion ;
+    rdfs:label "Linear motion specification"@en ;
+    rdfs:comment "Canonical reusable specification for linear motion requirements."@en .
+
+motion-lib:JointMotionSpec a motion:JointMotion ;
+    rdfs:label "Joint motion specification"@en ;
+    rdfs:comment "Canonical reusable specification for joint-space motion requirements."@en .
+
+motion-lib:CartesianMotionSpec a motion:CartesianMotion ;
+    rdfs:label "Cartesian motion specification"@en ;
+    rdfs:comment "Canonical reusable specification for Cartesian motion requirements."@en .

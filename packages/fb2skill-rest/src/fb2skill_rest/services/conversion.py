@@ -1,6 +1,7 @@
 """Zip-upload -> TTL pipeline. The only place that wires fb2skill-core to HTTP."""
 from __future__ import annotations
 
+import dataclasses
 import tempfile
 import zipfile
 from pathlib import Path
@@ -11,7 +12,11 @@ from fb2skill_core.opcua_nodes import (
     load_node_set,
     resolve_bindings,
 )
-from fb2skill_core.project import discover_skill_fbts, find_deployment_opcua_xml
+from fb2skill_core.project import (
+    build_instance_name_index,
+    discover_skill_fbts,
+    find_deployment_opcua_xml,
+)
 from fb2skill_core.render import render_skill
 
 from ..schemas.convert import ConvertResponse, Failure, SkillTtl
@@ -76,15 +81,11 @@ def convert_zip(
         tmpdir = Path(td)
         project_root, opcua_xml = _do_extract_and_setup(zip_bytes, opcua_xml_rel_path, tmpdir)
 
-        # Reseat provenance labels onto the render config (immutable dataclass, so rebuild).
-        rc = RenderConfig(
-            endpoint_url=render_config.endpoint_url,
-            base_iri=render_config.base_iri,
-            resource=render_config.resource,
-            namespace_index=render_config.namespace_index,
+        # Reseat provenance labels onto the render config (immutable dataclass).
+        rc = dataclasses.replace(
+            render_config,
             project_label=source_zip_name,
             source_label=opcua_xml.name,
-            only=render_config.only,
         )
 
         parsed_fbts = discover_skill_fbts(project_root)
@@ -97,12 +98,13 @@ def convert_zip(
             return ConvertResponse(skills=[], warnings=warnings, failures=[])
 
         node_set = load_node_set(opcua_xml, target_ns=rc.namespace_index)
+        instance_names = build_instance_name_index(project_root)
 
         skills: list[SkillTtl] = []
         failures: list[Failure] = []
         for parsed in parsed_fbts:
             try:
-                resolved = resolve_bindings(parsed, node_set)
+                resolved = resolve_bindings(parsed, node_set, instance_names)
             except SkillResolutionError as e:
                 failures.append(Failure(name=parsed.name, error=str(e)))
                 continue

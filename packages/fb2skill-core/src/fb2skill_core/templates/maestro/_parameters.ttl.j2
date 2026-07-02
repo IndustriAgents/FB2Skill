@@ -1,0 +1,24 @@
+{% for v in skill.parameters %}
+# =============================================================================
+# Skill parameter {{ v.name }}  ->  OPC UA node {{ v.name }} (writable {{ v.iec_type or v.sk_type|upper }} input)
+# =============================================================================
+
+:{{ skill.name }}_Param_{{ v.name }} a skill:ParameterDef , opcua:OpcUaVariable , owl:NamedIndividual ;
+    rdfs:label "{{ v.name }}" ;
+    skill:paramType "{{ sk_type_xsd[v.sk_type] }}"^^xsd:anyURI ;
+    opcua:nodeId "{{ v.opcua.node_id_str }}" ;
+    opcua:browseName "{{ v.name }}" .
+
+{% endfor %}
+{% for v in skill.outputs %}
+# =============================================================================
+# Skill output {{ v.name }}  ->  OPC UA node {{ v.name }} (readable {{ v.iec_type or v.sk_type|upper }} output)
+# =============================================================================
+
+:{{ skill.name }}_Param_{{ v.name }} a skill:ParameterDef , opcua:OpcUaVariable , owl:NamedIndividual ;
+    rdfs:label "{{ v.name }}" ;
+    skill:paramType "{{ sk_type_xsd[v.sk_type] }}"^^xsd:anyURI ;
+    opcua:nodeId "{{ v.opcua.node_id_str }}" ;
+    opcua:browseName "{{ v.name }}" .
+
+{% endfor %}

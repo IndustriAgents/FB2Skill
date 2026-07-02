@@ -1,0 +1,92 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix skill:     <https://w3id.org/maestro/skill#> .
+@prefix skill-lib: <https://w3id.org/maestro/skill-lib#> .
+@prefix cap:       <https://w3id.org/maestro/capability#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/capability> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/capability/0.3.0> ;
+    rdfs:label "MAESTRO Capability Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ,
+                <https://w3id.org/maestro/skill-lib> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Reusable manufacturing capability specifications. Capabilities are modeled as individuals of core:Capability so applications, rules, and SPARQL queries can traverse them directly."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+cap:realizedBySkill a owl:ObjectProperty ;
+    rdfs:label "realizedBySkill"@en ;
+    rdfs:domain core:Capability ;
+    rdfs:range  core:Skill ;
+    rdfs:subPropertyOf core:realizedBySkill ;
+    rdfs:comment "A Capability specification is realized by a reusable Skill specification."@en .
+
+#################################################################
+# CAPABILITY TAXONOMY
+#################################################################
+
+cap:CapabilityScheme a skos:ConceptScheme ;
+    rdfs:label "MAESTRO Capability Scheme"@en ;
+    rdfs:comment "SKOS organization for reusable manufacturing capability specifications."@en .
+
+cap:AssemblyCapability a core:Capability , skos:Concept ;
+    rdfs:label "AssemblyCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:prefLabel "Assembly capability"@en ;
+    rdfs:comment "Ability to combine parts into an assembly."@en .
+
+cap:HandlingCapability a core:Capability , skos:Concept ;
+    rdfs:label "HandlingCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:prefLabel "Handling capability"@en .
+
+cap:PickPlaceCapability a core:Capability , skos:Concept ;
+    rdfs:label "PickPlaceCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:broader cap:HandlingCapability ;
+    cap:realizedBySkill skill-lib:Transfer ;
+    skos:prefLabel "Pick-and-place capability"@en ;
+    rdfs:comment "Pick a part at location A and place it at location B."@en .
+
+cap:TransportCapability a core:Capability , skos:Concept ;
+    rdfs:label "TransportCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    cap:realizedBySkill skill-lib:MoveLinear ,
+                        skill-lib:MoveJoint ;
+    skos:prefLabel "Transport capability"@en ;
+    rdfs:comment "Ability to transport material between locations."@en .
+
+cap:InspectionCapability a core:Capability , skos:Concept ;
+    rdfs:label "InspectionCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:prefLabel "Inspection capability"@en .
+
+cap:WeldingCapability a core:Capability , skos:Concept ;
+    rdfs:label "WeldingCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:prefLabel "Welding capability"@en .
+
+cap:MachiningCapability a core:Capability , skos:Concept ;
+    rdfs:label "MachiningCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:prefLabel "Machining capability"@en .
+
+cap:PackagingCapability a core:Capability , skos:Concept ;
+    rdfs:label "PackagingCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:prefLabel "Packaging capability"@en .
+
+cap:TestingCapability a core:Capability , skos:Concept ;
+    rdfs:label "TestingCapability"@en ;
+    skos:inScheme cap:CapabilityScheme ;
+    skos:prefLabel "Testing capability"@en .

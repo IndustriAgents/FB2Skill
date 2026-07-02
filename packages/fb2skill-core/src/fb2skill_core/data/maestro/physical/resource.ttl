@@ -1,0 +1,177 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix unit:  <https://w3id.org/maestro/unit#> .
+@prefix aml:   <https://w3id.org/maestro/automationml#> .
+@prefix res:   <https://w3id.org/maestro/resource#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/resource> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/resource/0.4.0> ;
+    rdfs:label "MAESTRO Resource Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/unit> ,
+                <https://w3id.org/maestro/automationml> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Physical manufacturing assets. Resources DO NOT contain manufacturing semantics — they only provide skills, support motion, and expose interfaces. 0.4.0 adds res:Module, the reconfigurable plug-and-produce module that anchors AutomationML topology (HHM-Core Priority 6)."@en .
+
+#################################################################
+# MACHINE HIERARCHY
+#################################################################
+
+res:Machine a owl:Class ;
+    rdfs:label "Machine"@en ;
+    rdfs:subClassOf core:Resource ;
+    rdfs:comment "A general manufacturing machine."@en .
+
+res:Robot a owl:Class ;
+    rdfs:label "Robot"@en ;
+    rdfs:subClassOf res:Machine ;
+    rdfs:comment "An articulated, programmable, multi-axis machine."@en .
+
+res:Cobot a owl:Class ;
+    rdfs:label "Cobot"@en ;
+    rdfs:subClassOf res:Robot ;
+    rdfs:comment "A collaborative robot designed for safe human interaction."@en .
+
+res:TransferArm a owl:Class ;
+    rdfs:label "TransferArm"@en ;
+    rdfs:subClassOf res:Robot ;
+    rdfs:comment "A robotic arm specialised for transfer / pick-and-place tasks."@en .
+
+res:AGV a owl:Class ;
+    rdfs:label "AGV"@en ;
+    rdfs:subClassOf res:Machine ;
+    rdfs:comment "Automated Guided Vehicle."@en .
+
+res:CNC a owl:Class ;
+    rdfs:label "CNC"@en ;
+    rdfs:subClassOf res:Machine ;
+    rdfs:comment "Computer Numerical Control machining centre."@en .
+
+res:Conveyor a owl:Class ;
+    rdfs:label "Conveyor"@en ;
+    rdfs:subClassOf res:Machine ;
+    rdfs:comment "Material handling conveyor."@en .
+
+res:AssemblyStation a owl:Class ;
+    rdfs:label "AssemblyStation"@en ;
+    rdfs:subClassOf res:Machine ;
+    rdfs:comment "Workstation where assembly operations take place."@en .
+
+res:LaserUnit a owl:Class ;
+    rdfs:label "LaserUnit"@en ;
+    rdfs:subClassOf res:Machine ;
+    rdfs:comment "Laser machining / marking / welding unit."@en .
+
+#################################################################
+# TOOLING & END-EFFECTORS
+#################################################################
+
+res:Tool a owl:Class ;
+    rdfs:label "Tool"@en ;
+    rdfs:subClassOf core:Resource .
+
+res:Gripper a owl:Class ;
+    rdfs:label "Gripper"@en ;
+    rdfs:subClassOf res:Tool .
+
+res:ToolChanger a owl:Class ;
+    rdfs:label "ToolChanger"@en ;
+    rdfs:subClassOf res:Tool .
+
+res:VacuumUnit a owl:Class ;
+    rdfs:label "VacuumUnit"@en ;
+    rdfs:subClassOf res:Tool ;
+    rdfs:comment "Vacuum end-effector for pick operations."@en .
+
+#################################################################
+# COMPONENTS
+#################################################################
+
+res:Actuator a owl:Class ;
+    rdfs:label "Actuator"@en ;
+    rdfs:subClassOf core:Resource .
+
+res:ServoMotor a owl:Class ;
+    rdfs:label "ServoMotor"@en ;
+    rdfs:subClassOf res:Actuator .
+
+# NOTE (0.3.0): res:Sensor and res:Camera were removed to eliminate the
+# duplicate definitions that lived in resource.ttl and sensor.ttl. Use
+# sensor:Sensor / sensor:VisionSensor (SOSA-aligned, also subclasses of
+# core:Resource) instead. See decisions/0004-collision-rename.md.
+
+#################################################################
+# CONTROL HARDWARE
+#################################################################
+
+res:ControllerDevice a owl:Class ;
+    rdfs:label "ControllerDevice"@en ;
+    rdfs:subClassOf core:Resource ;
+    rdfs:comment "Physical controller or compute hardware that hosts logical ControlComponents."@en .
+
+res:PLC a owl:Class ;
+    rdfs:label "PLC"@en ;
+    rdfs:subClassOf res:ControllerDevice ;
+    rdfs:comment "Programmable Logic Controller hardware. PLC programs and Function Blocks are logical ControlComponents deployed on this hardware."@en .
+
+res:IndustrialPC a owl:Class ;
+    rdfs:label "IndustrialPC"@en ;
+    rdfs:subClassOf res:ControllerDevice ;
+    rdfs:comment "Industrial compute hardware that hosts logical ControlComponents."@en .
+
+#################################################################
+# RECONFIGURABLE MODULE (new 0.4.0, HHM-Core P6)
+#################################################################
+
+res:Module a owl:Class ;
+    rdfs:label "Module"@en ;
+    rdfs:subClassOf core:Resource ,
+                    aml:InternalElement ;
+    rdfs:comment "A reconfigurable, plug-and-produce production module (MTP-style). As an AutomationML InternalElement it anchors imported plant topology, ports and connections."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+res:manufacturer a owl:DatatypeProperty ;
+    rdfs:label "manufacturer"@en ;
+    rdfs:range xsd:string .
+
+res:model a owl:DatatypeProperty ;
+    rdfs:label "model"@en ;
+    rdfs:range xsd:string .
+
+res:serialNumber a owl:DatatypeProperty ;
+    rdfs:label "serialNumber"@en ;
+    rdfs:range xsd:string .
+
+res:payloadKg a owl:DatatypeProperty ;
+    rdfs:label "payloadKg"@en ;
+    rdfs:range xsd:float ;
+    owl:deprecated true ;
+    rdfs:comment "Maximum payload of a robot or handling resource, in kilograms."@en .
+
+res:reachMm a owl:DatatypeProperty ;
+    rdfs:label "reachMm"@en ;
+    rdfs:range xsd:float ;
+    owl:deprecated true ;
+    rdfs:comment "Robot reach in millimetres."@en .
+
+res:payload a owl:ObjectProperty ;
+    rdfs:label "payload"@en ;
+    rdfs:domain res:Robot ;
+    rdfs:range  unit:Quantity ;
+    rdfs:comment "Maximum payload as an explicit quantity value."@en .
+
+res:reach a owl:ObjectProperty ;
+    rdfs:label "reach"@en ;
+    rdfs:domain res:Robot ;
+    rdfs:range  unit:Quantity ;
+    rdfs:comment "Robot reach as an explicit quantity value."@en .

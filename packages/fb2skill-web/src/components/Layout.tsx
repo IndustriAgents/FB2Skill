@@ -68,7 +68,7 @@ const navItems: NavItem[] = [
 const pageMeta: Record<string, { title: string; crumb: string }> = {
   "/": { title: "Convert", crumb: "Tools · Convert" },
   "/discover": { title: "Discover", crumb: "Tools · Discover" },
-  "/ontology": { title: "CaSkMan ontology", crumb: "Reference · Ontology" },
+  "/ontology": { title: "Ontologies", crumb: "Reference · Ontologies" },
   "/visualize": { title: "ISA-88 state machine", crumb: "Reference · State machine" },
 };
 
@@ -81,7 +81,7 @@ interface Connection {
 const CONNECTIONS: Connection[] = [
   { name: "fb2skill API", detail: "REST", state: "ok" },
   { name: "OPC UA broker", detail: "4840", state: "ok" },
-  { name: "CaSkMan", detail: "v4.3.0", state: "ok" },
+  { name: "Ontologies", detail: "MAESTRO · CaSkMan", state: "ok" },
 ];
 
 export default function Layout() {
@@ -211,7 +211,7 @@ export default function Layout() {
               ? "Live · API"
               : "API offline"}
           </span>
-          <span className="tb-pill">CaSkMan v4.3.0</span>
+          <span className="tb-pill">MAESTRO 0.4 · CaSkMan 4.3</span>
         </div>
       </header>
 

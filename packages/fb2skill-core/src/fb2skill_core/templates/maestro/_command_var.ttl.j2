@@ -1,0 +1,8 @@
+# =============================================================================
+# SKILL_CMD  ->  writable INT command variable driving the state machine
+# =============================================================================
+
+:{{ skill.name }}_SKILL_CMD a opcua:OpcUaVariable , owl:NamedIndividual ;
+    opcua:nodeId "{{ skill.skill_command.node_id_str }}" ;
+    opcua:browseName "{{ skill.skill_command.browse_name }}" ;
+    rdfs:comment "Write a command value (Start=1 ... Abort=9) to fire a state-machine transition." .

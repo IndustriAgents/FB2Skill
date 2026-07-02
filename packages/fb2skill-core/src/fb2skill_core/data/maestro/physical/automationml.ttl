@@ -1,0 +1,62 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix core: <https://w3id.org/maestro/core#> .
+@prefix aml:  <https://w3id.org/maestro/automationml#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#
+# Bridge module — AutomationML / CAEX (IEC 62714). Lets MAESTRO import
+# equipment topology, ports and connections that HHM-Core flags as an
+# extension point (Priority 6). res:Module (resource.ttl) is declared
+# a subclass of aml:InternalElement, the natural anchor for imported
+# AutomationML InternalElements.
+#
+# CAEX is an XML schema (IEC 62714), not an OWL ontology, so there is
+# no canonical upstream graph to subclass; these aml: classes are
+# MAESTRO-local mirrors of the CAEX object model.
+#################################################################
+
+<https://w3id.org/maestro/automationml> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/automationml/0.4.0> ;
+    rdfs:label "MAESTRO AutomationML Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Plant topology mirror of AutomationML/CAEX (IEC 62714): InternalElement, ExternalInterface, InternalLink. New in 0.4.0 (HHM-Core Priority 6)."@en .
+
+#################################################################
+# CLASSES (CAEX object model)
+#################################################################
+
+aml:InternalElement a owl:Class ;
+    rdfs:label "InternalElement"@en ;
+    rdfs:subClassOf core:PhysicalEntity ;
+    rdfs:comment "A CAEX InternalElement — a node in the plant topology hierarchy."@en .
+
+aml:ExternalInterface a owl:Class ;
+    rdfs:label "ExternalInterface"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A CAEX ExternalInterface — a port through which InternalElements connect."@en .
+
+aml:InternalLink a owl:Class ;
+    rdfs:label "InternalLink"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A CAEX InternalLink — a connection between two ExternalInterfaces."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+aml:hasInterface a owl:ObjectProperty ;
+    rdfs:label "hasInterface"@en ;
+    rdfs:domain aml:InternalElement ;
+    rdfs:range  aml:ExternalInterface ;
+    rdfs:comment "An InternalElement exposes an ExternalInterface (port)."@en .
+
+aml:linksInterface a owl:ObjectProperty ;
+    rdfs:label "linksInterface"@en ;
+    rdfs:domain aml:InternalLink ;
+    rdfs:range  aml:ExternalInterface ;
+    rdfs:comment "An InternalLink connects two ExternalInterfaces."@en .

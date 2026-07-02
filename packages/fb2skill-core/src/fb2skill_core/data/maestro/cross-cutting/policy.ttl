@@ -1,0 +1,112 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix odrl:   <http://www.w3.org/ns/odrl/2/> .
+@prefix policy: <https://w3id.org/maestro/policy#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#
+# Bridge module — ODRL 2.2 (with XACML-style RBAC). Adds the
+# governance cluster HHM-Core has and MAESTRO lacked entirely
+# (Priority 3): Policy / Permission / Prohibition align to ODRL;
+# Role, Mode and Evidence are MAESTRO-local but referenced by the
+# policy. SHACL (already shipped) remains the enforcement mechanism.
+# Full ODRL is bundled for reference only in references/odrl22.ttl
+# (not imported into the stack, per the import policy).
+#################################################################
+
+<https://w3id.org/maestro/policy> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/policy/0.4.0> ;
+    rdfs:label "MAESTRO Policy Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Access control, governance and operating modes aligned to ODRL 2.2. Policy/Permission/Prohibition bridge to odrl:; Role/Mode/Evidence are MAESTRO-local. New in 0.4.0 (HHM-Core Priority 3)."@en .
+
+#################################################################
+# CLASSES (ODRL alignment)
+#################################################################
+
+policy:Policy a owl:Class ;
+    rdfs:label "Policy"@en ;
+    rdfs:subClassOf core:LogicalEntity ,
+                    odrl:Policy ;
+    rdfs:comment "A non-empty group of Permissions/Prohibitions governing skills, steps, modules or endpoints. Subclass of odrl:Policy."@en .
+
+policy:Permission a owl:Class ;
+    rdfs:label "Permission"@en ;
+    rdfs:subClassOf core:LogicalEntity ,
+                    odrl:Permission ;
+    rdfs:comment "The ability to perform an action over a target. Subclass of odrl:Permission."@en .
+
+policy:Prohibition a owl:Class ;
+    rdfs:label "Prohibition"@en ;
+    rdfs:subClassOf core:LogicalEntity ,
+                    odrl:Prohibition ;
+    rdfs:comment "The inability to perform an action over a target. Subclass of odrl:Prohibition."@en .
+
+policy:Role a owl:Class ;
+    rdfs:label "Role"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "An actor role to which permissions are granted (RBAC). MAESTRO-local."@en .
+
+policy:Mode a owl:Class ;
+    rdfs:label "Mode"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "An operating mode (auto / manual / maintenance) that a policy can require. MAESTRO-local."@en .
+
+policy:AutoMode        a policy:Mode ; rdfs:label "Automatic"@en .
+policy:ManualMode      a policy:Mode ; rdfs:label "Manual"@en .
+policy:MaintenanceMode a policy:Mode ; rdfs:label "Maintenance"@en .
+
+policy:Evidence a owl:Class ;
+    rdfs:label "Evidence"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "An audit/observation reference backing a policy decision. MAESTRO-local."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+policy:contains a owl:ObjectProperty ;
+    rdfs:label "contains"@en ;
+    rdfs:domain policy:Policy ;
+    rdfs:range  core:Constraint ;
+    rdfs:comment "A Policy contains a Constraint (HHM-Core Policy contains Constraint)."@en .
+
+policy:hasPermission a owl:ObjectProperty ;
+    rdfs:label "hasPermission"@en ;
+    rdfs:domain policy:Policy ;
+    rdfs:range  policy:Permission .
+
+policy:hasProhibition a owl:ObjectProperty ;
+    rdfs:label "hasProhibition"@en ;
+    rdfs:domain policy:Policy ;
+    rdfs:range  policy:Prohibition .
+
+policy:grantedTo a owl:ObjectProperty ;
+    rdfs:label "grantedTo"@en ;
+    rdfs:domain policy:Permission ;
+    rdfs:range  policy:Role ;
+    rdfs:comment "A Permission is granted to a Role (HHM-Core Permission grantedTo Role)."@en .
+
+policy:requiresPermission a owl:ObjectProperty ;
+    rdfs:label "requiresPermission"@en ;
+    rdfs:domain policy:Policy ;
+    rdfs:range  policy:Permission ;
+    rdfs:comment "A Policy requires a Permission to apply (HHM-Core Policy requiresPermission Permission)."@en .
+
+policy:requiresMode a owl:ObjectProperty ;
+    rdfs:label "requiresMode"@en ;
+    rdfs:domain policy:Policy ;
+    rdfs:range  policy:Mode ;
+    rdfs:comment "A Policy gates on an operating Mode (HHM-Core Policy requiresMode Mode)."@en .
+
+policy:hasEvidence a owl:ObjectProperty ;
+    rdfs:label "hasEvidence"@en ;
+    rdfs:domain policy:Policy ;
+    rdfs:range  policy:Evidence ;
+    rdfs:comment "A Policy is backed by Evidence (HHM-Core Policy hasEvidence Evidence)."@en .

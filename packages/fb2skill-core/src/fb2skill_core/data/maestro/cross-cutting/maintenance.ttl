@@ -1,0 +1,68 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix maint: <https://w3id.org/maestro/maintenance#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/maintenance> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/maintenance/0.3.0> ;
+    rdfs:label "MAESTRO Maintenance Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Maintenance events, schedules, and predictive analytics."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+maint:MaintenanceAction a owl:Class ;
+    rdfs:label "MaintenanceAction"@en ;
+    rdfs:subClassOf core:Event .
+
+maint:Preventive a owl:Class ;
+    rdfs:label "Preventive"@en ;
+    rdfs:subClassOf maint:MaintenanceAction .
+
+maint:Corrective a owl:Class ;
+    rdfs:label "Corrective"@en ;
+    rdfs:subClassOf maint:MaintenanceAction .
+
+maint:Predictive a owl:Class ;
+    rdfs:label "Predictive"@en ;
+    rdfs:subClassOf maint:MaintenanceAction ;
+    rdfs:comment "Maintenance triggered by predictive analytics over sensor data."@en .
+
+maint:Inspection a owl:Class ;
+    rdfs:label "Inspection"@en ;
+    rdfs:subClassOf maint:MaintenanceAction .
+
+maint:FaultDiagnosis a owl:Class ;
+    rdfs:label "FaultDiagnosis"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+maint:scheduledFor a owl:DatatypeProperty ;
+    rdfs:domain maint:MaintenanceAction ;
+    rdfs:range  xsd:dateTime .
+
+maint:performedAt a owl:DatatypeProperty ;
+    rdfs:domain maint:MaintenanceAction ;
+    rdfs:range  xsd:dateTime .
+
+maint:remainingUsefulLifeHours a owl:DatatypeProperty ;
+    rdfs:domain core:Resource ;
+    rdfs:range  xsd:double .
+
+maint:mtbfHours a owl:DatatypeProperty ;
+    rdfs:label "mtbfHours"@en ;
+    rdfs:domain core:Resource ;
+    rdfs:range  xsd:double ;
+    rdfs:comment "Mean time between failures, in hours."@en .

@@ -1,0 +1,78 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix sosa:   <http://www.w3.org/ns/sosa/> .
+@prefix ssn:    <http://www.w3.org/ns/ssn/> .
+@prefix sensor: <https://w3id.org/maestro/sensor#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/sensor> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/sensor/0.4.0> ;
+    rdfs:label "MAESTRO Sensor Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Sensor classes aligned with W3C SSN/SOSA. In 0.3.0 the shadow properties sensor:observes / sensor:hasObservation / sensor:resultValue / sensor:resultTime were removed; use sosa:observes / sosa:madeObservation / sosa:hasSimpleResult / sosa:resultTime directly."@en .
+
+#################################################################
+# CLASSES (SSN/SOSA alignment)
+#################################################################
+
+sensor:Sensor a owl:Class ;
+    rdfs:label "Sensor"@en ;
+    rdfs:subClassOf core:Resource , sosa:Sensor ;
+    rdfs:comment "Physical sensor. Subclass of both core:Resource and sosa:Sensor so SOSA-native graphs federate cleanly."@en .
+
+sensor:Observation a owl:Class ;
+    rdfs:label "Observation"@en ;
+    rdfs:subClassOf core:Event , sosa:Observation ;
+    rdfs:comment "A sensor observation. Subclass of core:Event so it joins the MAESTRO eventing model."@en .
+
+sensor:ObservableProperty a owl:Class ;
+    rdfs:label "ObservableProperty"@en ;
+    rdfs:subClassOf core:LogicalEntity , sosa:ObservableProperty .
+
+sensor:FeatureOfInterest a owl:Class ;
+    rdfs:label "FeatureOfInterest"@en ;
+    rdfs:subClassOf core:LogicalEntity , sosa:FeatureOfInterest .
+
+#################################################################
+# COMMON INDUSTRIAL SENSOR TYPES
+#################################################################
+
+sensor:TemperatureSensor   rdfs:subClassOf sensor:Sensor ; rdfs:label "TemperatureSensor"@en .
+sensor:PressureSensor      rdfs:subClassOf sensor:Sensor ; rdfs:label "PressureSensor"@en .
+sensor:VibrationSensor     rdfs:subClassOf sensor:Sensor ; rdfs:label "VibrationSensor"@en .
+sensor:ForceSensor         rdfs:subClassOf sensor:Sensor ; rdfs:label "ForceSensor"@en .
+sensor:TorqueSensor        rdfs:subClassOf sensor:Sensor ; rdfs:label "TorqueSensor"@en .
+sensor:ProximitySensor     rdfs:subClassOf sensor:Sensor ; rdfs:label "ProximitySensor"@en .
+sensor:VisionSensor        rdfs:subClassOf sensor:Sensor ; rdfs:label "VisionSensor"@en ;
+                           rdfs:comment "Includes industrial cameras and machine-vision systems (replaces res:Camera)."@en .
+
+# Properties:
+#   - Use sosa:observes        (Sensor -> ObservableProperty) for sensing intent.
+#   - Use sosa:madeObservation (Sensor -> Observation) for the link to a measurement.
+#   - Use sosa:hasSimpleResult or sosa:hasResult for measured values.
+#   - Use sosa:resultTime      (xsd:dateTime) for measurement timestamps.
+#   - Use sosa:hasFeatureOfInterest (Observation -> FeatureOfInterest).
+# These come transitively via the SOSA/SSN imports and do not need MAESTRO
+# shadow duplicates.
+
+#################################################################
+# SKILL <-> OBSERVATION EVIDENCE (new 0.4.0, HHM-Core "obs evidence")
+#
+# Links a Skill to the SOSA Observation(s) that provide evidence for it
+# (e.g. that a precondition held or a postcondition was met). Declared
+# here, in the SOSA bridge module, so skill.ttl need not depend on
+# sensor.ttl.
+#################################################################
+
+sensor:hasObservationEvidence a owl:ObjectProperty ;
+    rdfs:label "hasObservationEvidence"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  sosa:Observation ;
+    rdfs:comment "A Skill is supported by a SOSA Observation as evidence (HHM-Core Skill->Observation obs-evidence edge)."@en .

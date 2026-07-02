@@ -1,0 +1,208 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix proc:  <https://w3id.org/maestro/process#> .
+@prefix prod:  <https://w3id.org/maestro/product#> .
+@prefix unit:  <https://w3id.org/maestro/unit#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/product> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/product/0.4.0> ;
+    rdfs:label "MAESTRO Product Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/process> ,
+                <https://w3id.org/maestro/unit> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Products, parts, assemblies, features, and tolerances. A Product declares the Processes required to manufacture it. 0.4.0 adds an explicit type/instance split, variants, requirements, multi-scheme identifiers and a structured BOM node — closing the HHM-Core product-identity gap (Priority 4)."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+prod:Part a owl:Class ;
+    rdfs:label "Part"@en ;
+    rdfs:subClassOf core:Product ;
+    rdfs:comment "An atomic manufactured item — not further decomposed in this model."@en .
+
+prod:Assembly a owl:Class ;
+    rdfs:label "Assembly"@en ;
+    rdfs:subClassOf core:Product ;
+    rdfs:comment "A Product composed of multiple Parts and/or sub-Assemblies."@en .
+
+prod:Feature a owl:Class ;
+    rdfs:label "Feature"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A geometric or functional feature of a Product (hole, slot, surface)."@en .
+
+prod:Tolerance a owl:Class ;
+    rdfs:label "Tolerance"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A dimensional, geometric, or surface tolerance specification."@en .
+
+prod:Material a owl:Class ;
+    rdfs:label "Material"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+prod:hasFeature a owl:ObjectProperty ;
+    rdfs:label "hasFeature"@en ;
+    rdfs:domain core:Product ;
+    rdfs:range  prod:Feature .
+
+prod:hasTolerance a owl:ObjectProperty ;
+    rdfs:label "hasTolerance"@en ;
+    rdfs:domain prod:Feature ;
+    rdfs:range  prod:Tolerance .
+
+prod:madeOf a owl:ObjectProperty ;
+    rdfs:label "madeOf"@en ;
+    rdfs:domain core:Product ;
+    rdfs:range  prod:Material .
+
+prod:requiresProcess a owl:ObjectProperty ;
+    rdfs:label "requiresProcess"@en ;
+    rdfs:domain core:Product ;
+    rdfs:range  proc:ManufacturingProcess ;
+    rdfs:comment "A Product requires a Manufacturing Process to be produced."@en .
+
+prod:mass a owl:ObjectProperty ;
+    rdfs:label "mass"@en ;
+    rdfs:domain core:Product ;
+    rdfs:range  unit:Quantity ;
+    rdfs:comment "Product mass as a unit-bearing quantity."@en .
+
+prod:massKg a owl:DatatypeProperty ;
+    rdfs:label "massKg"@en ;
+    rdfs:domain core:Product ;
+    rdfs:range  xsd:float ;
+    owl:deprecated true ;
+    rdfs:comment "Deprecated unit-suffixed datatype property. Use prod:mass with unit:Quantity instead."@en .
+
+#################################################################
+# TYPE / INSTANCE SPLIT, VARIANTS, REQUIREMENTS (new 0.4.0, HHM-Core P4)
+#
+# HHM-Core distinguishes a ProductType (the catalogue/design item)
+# from a ProductInstance (a physically produced unit). MAESTRO keeps
+# core:Product as the common super-class.
+#################################################################
+
+prod:ProductType a owl:Class ;
+    rdfs:label "ProductType"@en ;
+    rdfs:subClassOf core:Product ;
+    rdfs:comment "A product design / catalogue type (what is specified). Mirrors HHM-Core ProductType."@en .
+
+prod:ProductInstance a owl:Class ;
+    rdfs:label "ProductInstance"@en ;
+    rdfs:subClassOf core:Product ;
+    rdfs:comment "A physically produced unit of a ProductType (what is built). Mirrors HHM-Core ProductInstance."@en .
+
+prod:instanceOfType a owl:ObjectProperty ;
+    rdfs:label "instanceOfType"@en ;
+    rdfs:domain prod:ProductInstance ;
+    rdfs:range  prod:ProductType ;
+    rdfs:comment "Links a produced ProductInstance to the ProductType it realises."@en .
+
+prod:Variant a owl:Class ;
+    rdfs:label "Variant"@en ;
+    rdfs:subClassOf prod:ProductType ;
+    rdfs:comment "A configuration/variant of a ProductType (HHM-Core aligns variants to PRONTO)."@en .
+
+prod:variantOf a owl:ObjectProperty ;
+    rdfs:label "variantOf"@en ;
+    rdfs:domain prod:Variant ;
+    rdfs:range  prod:ProductType ;
+    rdfs:comment "A Variant is a configuration of a base ProductType."@en .
+
+prod:Requirement a owl:Class ;
+    rdfs:label "Requirement"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A requirement that applies to a product Feature (functional, dimensional, regulatory …)."@en .
+
+prod:appliesTo a owl:ObjectProperty ;
+    rdfs:label "appliesTo"@en ;
+    rdfs:domain prod:Requirement ;
+    rdfs:range  prod:Feature ;
+    rdfs:comment "A Requirement applies to a Feature."@en .
+
+#################################################################
+# MULTI-SCHEME IDENTIFIER OBJECT
+#
+# core:identifier remains the simple string id; prod:Identifier is the
+# reified, multi-scheme identifier object (GTIN / UUID / IRDI / IRI).
+#################################################################
+
+prod:Identifier a owl:Class ;
+    rdfs:label "Identifier"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A scheme-qualified identifier of a product (GTIN, UUID, IRDI, IRI)."@en .
+
+prod:GTIN a owl:Class ; rdfs:label "GTIN"@en ; rdfs:subClassOf prod:Identifier .
+prod:UUID a owl:Class ; rdfs:label "UUID"@en ; rdfs:subClassOf prod:Identifier .
+prod:IRDI a owl:Class ; rdfs:label "IRDI"@en ; rdfs:subClassOf prod:Identifier ;
+    rdfs:comment "International Registration Data Identifier (e.g. ECLASS / IEC CDD)."@en .
+prod:IRI  a owl:Class ; rdfs:label "IRI"@en  ; rdfs:subClassOf prod:Identifier .
+
+prod:hasIdentifier a owl:ObjectProperty ;
+    rdfs:label "hasIdentifier"@en ;
+    rdfs:domain core:Product ;
+    rdfs:range  prod:Identifier ;
+    rdfs:comment "A Product carries one or more scheme-qualified Identifiers."@en .
+
+prod:scheme a owl:DatatypeProperty ;
+    rdfs:label "scheme"@en ;
+    rdfs:domain prod:Identifier ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Identifier scheme name, e.g. 'GTIN', 'UUID', 'IRDI', 'IRI'."@en .
+
+prod:value a owl:DatatypeProperty ;
+    rdfs:label "value"@en ;
+    rdfs:domain prod:Identifier ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "The identifier value within its scheme."@en .
+
+#################################################################
+# STRUCTURED BILL OF MATERIALS
+#################################################################
+
+prod:BOMNode a owl:Class ;
+    rdfs:label "BOMNode"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A node in a structured bill of materials: a referenced Product with quantity, position and reference designator. Adds structure that prod:Assembly + core:hasPart lack."@en .
+
+prod:hasBOMNode a owl:ObjectProperty ;
+    rdfs:label "hasBOMNode"@en ;
+    rdfs:domain prod:Assembly ;
+    rdfs:range  prod:BOMNode ;
+    rdfs:comment "An Assembly is structured by BOM nodes."@en .
+
+prod:nodeFor a owl:ObjectProperty ;
+    rdfs:label "nodeFor"@en ;
+    rdfs:domain prod:BOMNode ;
+    rdfs:range  core:Product ;
+    rdfs:comment "The Product referenced by a BOM node."@en .
+
+prod:quantity a owl:DatatypeProperty ;
+    rdfs:label "quantity"@en ;
+    rdfs:domain prod:BOMNode ;
+    rdfs:range  xsd:decimal ;
+    rdfs:comment "Quantity of the referenced Product in this BOM node."@en .
+
+prod:position a owl:DatatypeProperty ;
+    rdfs:label "position"@en ;
+    rdfs:domain prod:BOMNode ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Position / location of the node in the assembly."@en .
+
+prod:refDesignator a owl:DatatypeProperty ;
+    rdfs:label "refDesignator"@en ;
+    rdfs:domain prod:BOMNode ;
+    rdfs:range  xsd:string ;
+    rdfs:comment "Reference designator (e.g. 'R1', 'C3')."@en .

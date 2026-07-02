@@ -1,0 +1,275 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/core> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/core/0.4.0> ;
+    rdfs:label    "MAESTRO Core Ontology"@en ;
+    dct:title     "MAESTRO Core Ontology" ;
+    dct:creator   "Melwin Xavier" ;
+    dct:license   <https://opensource.org/licenses/MIT> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment  "Root abstractions of the MAESTRO modular manufacturing ontology stack. Every other module imports from here. 0.4.0 adds the additive core:constrains property reifying Constraint→target links (HHM-Core Priority 3)."@en .
+
+#################################################################
+# TOP-LEVEL CLASSES
+#################################################################
+
+core:Entity a owl:Class ;
+    rdfs:label "Entity"@en ;
+    rdfs:comment "The most general class. Anything modelled in MAESTRO is an Entity."@en .
+
+core:PhysicalEntity a owl:Class ;
+    rdfs:label "PhysicalEntity"@en ;
+    rdfs:subClassOf core:Entity ;
+    owl:disjointWith core:LogicalEntity ;
+    rdfs:comment "An entity that has a physical realisation (mass, location)."@en .
+
+core:LogicalEntity a owl:Class ;
+    rdfs:label "LogicalEntity"@en ;
+    rdfs:subClassOf core:Entity ;
+    rdfs:comment "An entity that exists only in the information model."@en .
+
+#################################################################
+# CORE DOMAIN CLASSES
+#################################################################
+
+core:Resource a owl:Class ;
+    rdfs:label "Resource"@en ;
+    rdfs:subClassOf core:PhysicalEntity ;
+    rdfs:comment "Any physical manufacturing asset (machine, robot, sensor, actuator, tool)."@en .
+
+core:Skill a owl:Class ;
+    rdfs:label "Skill"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    owl:disjointWith core:Capability ,
+                     core:Process ;
+    rdfs:comment "A logical, executable behaviour. Implemented by ControlComponents; provided by Resources."@en .
+
+core:Capability a owl:Class ;
+    rdfs:label "Capability"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    owl:disjointWith core:Process ;
+    rdfs:comment "A manufacturing possibility (what a plant CAN do). Realised by Skills."@en .
+
+core:Process a owl:Class ;
+    rdfs:label "Process"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "Manufacturing logic. Requires Capabilities to be executed."@en .
+
+core:Product a owl:Class ;
+    rdfs:label "Product"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A product, part, or assembly that requires manufacturing Processes."@en .
+
+core:State a owl:Class ;
+    rdfs:label "State"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A discrete operational condition of a Resource or ControlComponent."@en .
+
+core:Event a owl:Class ;
+    rdfs:label "Event"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A point-in-time occurrence in the manufacturing system."@en .
+
+core:Constraint a owl:Class ;
+    rdfs:label "Constraint"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A restriction on Skills, Resources, or Processes."@en .
+
+core:ControlComponent a owl:Class ;
+    rdfs:label "ControlComponent"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A software/hardware element that implements Skills and controls Resources (e.g. ROS node, PLC FB, IEC 61499 FB, OPC UA method)."@en .
+
+core:Plant a owl:Class ;
+    rdfs:label "Plant"@en ;
+    rdfs:subClassOf core:PhysicalEntity ;
+    rdfs:comment "An aggregation of Resources forming a manufacturing facility."@en .
+
+#################################################################
+# UNIVERSAL OBJECT PROPERTIES
+#
+# Every spine property carries an explicit rdfs:domain and rdfs:range
+# so that downstream SPARQL and OWL2-RL reasoners can type-check
+# without depending on per-adapter sub-properties.
+#################################################################
+
+core:requiresCapability a owl:ObjectProperty ;
+    rdfs:label "requiresCapability"@en ;
+    rdfs:domain core:Process ;
+    rdfs:range  core:Capability ;
+    rdfs:comment "A Process requires a Capability."@en .
+
+core:realizedBySkill a owl:ObjectProperty ;
+    rdfs:label "realizedBySkill"@en ;
+    rdfs:domain core:Capability ;
+    rdfs:range  core:Skill ;
+    owl:inverseOf core:realizes ;
+    rdfs:comment "A Capability is realized by a reusable Skill specification."@en .
+
+core:realizes a owl:ObjectProperty ;
+    rdfs:label "realizes"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  core:Capability ;
+    rdfs:comment "A Skill realises a Capability."@en .
+
+core:composedOfSkill a owl:ObjectProperty ;
+    rdfs:label "composedOfSkill"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  core:Skill ;
+    a owl:TransitiveProperty ;
+    rdfs:comment "A composite Skill is composed of another Skill. Transitive."@en .
+
+core:requiresMotion a owl:ObjectProperty ;
+    rdfs:label "requiresMotion"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  core:LogicalEntity ;
+    rdfs:comment "A Skill requires a technology-neutral motion specification. Range narrowed to motion:Motion in motion.ttl."@en .
+
+core:provides a owl:ObjectProperty ;
+    rdfs:label "provides"@en ;
+    rdfs:domain core:Resource ;
+    rdfs:range  core:Skill ;
+    owl:inverseOf core:providedBy ;
+    rdfs:comment "A Resource provides a Skill (offers it for use)."@en .
+
+core:providedBy a owl:ObjectProperty ;
+    rdfs:label "providedBy"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  core:Resource ;
+    rdfs:comment "Inverse of core:provides."@en .
+
+core:implements a owl:ObjectProperty ;
+    rdfs:label "implements"@en ;
+    rdfs:domain core:ControlComponent ;
+    rdfs:range  core:Skill ;
+    owl:inverseOf core:implementedBy ;
+    rdfs:comment "A ControlComponent implements a Skill (concrete realisation)."@en .
+
+core:implementedBy a owl:ObjectProperty ;
+    rdfs:label "implementedBy"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  core:ControlComponent ;
+    rdfs:comment "Inverse of core:implements."@en .
+
+core:executes a owl:ObjectProperty ;
+    rdfs:label "executes"@en ;
+    rdfs:domain core:ControlComponent ;
+    rdfs:comment "A ControlComponent executes a Process or Skill at runtime. Range is core:Skill or core:Process — left open via union (not asserted to keep OWL2-RL clean)."@en .
+
+core:controls a owl:ObjectProperty ;
+    rdfs:label "controls"@en ;
+    rdfs:domain core:ControlComponent ;
+    rdfs:range  core:Resource ;
+    rdfs:comment "A ControlComponent controls a Resource."@en .
+
+core:hasPart a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "hasPart"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range  core:Entity ;
+    owl:inverseOf core:partOf ;
+    rdfs:comment "Mereological part-of relation. Transitive: Plant hasPart Cell, Cell hasPart Robot entails Plant hasPart Robot."@en .
+
+core:partOf a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "partOf"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range  core:Entity ;
+    rdfs:comment "Inverse mereological relation. Transitive."@en .
+
+core:hasState a owl:ObjectProperty ;
+    rdfs:label "hasState"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range  core:State ;
+    rdfs:comment "Runtime operational State of an Entity. Use only inside a runtime named graph — see decisions/0002-runtime-graph-separation.md."@en .
+
+core:dependsOn a owl:ObjectProperty ;
+    rdfs:label "dependsOn"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range  core:Entity ;
+    rdfs:comment "Generic dependency relation."@en .
+
+core:connectedTo a owl:ObjectProperty , owl:SymmetricProperty ;
+    rdfs:label "connectedTo"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range  core:Entity ;
+    rdfs:comment "Physical or logical connectivity between two entities. Symmetric."@en .
+
+core:communicatesThrough a owl:ObjectProperty ;
+    rdfs:label "communicatesThrough"@en ;
+    rdfs:domain core:ControlComponent ;
+    rdfs:comment "A ControlComponent communicates with a Resource through a communication channel. Range is com:Channel (kept open here to avoid pulling communication.ttl into core)."@en .
+
+core:deployedOn a owl:ObjectProperty ;
+    rdfs:label "deployedOn"@en ;
+    rdfs:domain core:ControlComponent ;
+    rdfs:range  core:Resource ;
+    rdfs:comment "A logical ControlComponent is deployed on a physical controller or compute Resource."@en .
+
+core:hosts a owl:ObjectProperty ;
+    rdfs:label "hosts"@en ;
+    rdfs:domain core:Resource ;
+    rdfs:range  core:LogicalEntity ;
+    rdfs:comment "A physical Resource hosts a logical artefact (a ControlComponent, an IEC 61499 RuntimeResource, an OPC UA Server)."@en .
+
+core:emits a owl:ObjectProperty ;
+    rdfs:label "emits"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range  core:Event ;
+    rdfs:comment "An Entity emits an Event."@en .
+
+core:consumes a owl:ObjectProperty ;
+    rdfs:label "consumes"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range  core:Event ;
+    rdfs:comment "An Entity consumes an Event."@en .
+
+core:canPerform a owl:ObjectProperty ;
+    rdfs:label "canPerform"@en ;
+    rdfs:domain core:Resource ;
+    rdfs:range  core:Capability ;
+    rdfs:comment "Inferred relation: a Resource is capable of performing a Capability. Materialised by rules/capability-inference.rq."@en .
+
+core:canManufacture a owl:ObjectProperty ;
+    rdfs:label "canManufacture"@en ;
+    rdfs:domain core:Plant ;
+    rdfs:range  core:Product ;
+    rdfs:comment "Inferred relation: a Plant can manufacture a Product. Materialised by rules/manufacturing-ability.rq."@en .
+
+core:hasPlantCapability a owl:ObjectProperty ;
+    rdfs:label "hasPlantCapability"@en ;
+    rdfs:domain core:Plant ;
+    rdfs:range  core:Capability ;
+    rdfs:comment "Plant-level capability. Use this instead of core:canPerform on Plant individuals (canPerform is Resource-scoped)."@en .
+
+core:constrains a owl:ObjectProperty ;
+    rdfs:label "constrains"@en ;
+    rdfs:domain core:Constraint ;
+    rdfs:comment "A Constraint reifies a restriction on a target — a Skill, recipe:PlanStep, res:Module or com:Endpoint. Range left open (union of targets) to keep OWL2-RL clean. New in 0.4.0 (HHM-Core Constraint→target edges)."@en .
+
+#################################################################
+# UNIVERSAL DATATYPE PROPERTIES
+#################################################################
+
+core:identifier a owl:DatatypeProperty , owl:FunctionalProperty , owl:InverseFunctionalProperty ;
+    rdfs:label "identifier"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range xsd:string ;
+    rdfs:comment "Globally unique identifier (e.g. AAS shortId, OPC UA NodeId). Functional (each entity has at most one) and inverse-functional (each identifier names at most one entity)."@en .
+
+core:version a owl:DatatypeProperty ;
+    rdfs:label "version"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range xsd:string .
+
+core:description a owl:DatatypeProperty ;
+    rdfs:label "description"@en ;
+    rdfs:domain core:Entity ;
+    rdfs:range xsd:string .

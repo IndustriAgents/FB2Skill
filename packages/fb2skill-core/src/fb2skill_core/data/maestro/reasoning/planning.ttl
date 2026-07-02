@@ -1,0 +1,87 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix core: <https://w3id.org/maestro/core#> .
+@prefix plan: <https://w3id.org/maestro/planning#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/planning> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/planning/0.3.0> ;
+    rdfs:label "MAESTRO Planning Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Production planning concepts aligned with ISA-95 (Enterprise-Control System Integration)."@en .
+
+#################################################################
+# ISA-95 EQUIPMENT HIERARCHY
+#################################################################
+
+plan:Enterprise a owl:Class ;
+    rdfs:label "Enterprise"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plan:Site a owl:Class ;
+    rdfs:label "Site"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plan:Area a owl:Class ;
+    rdfs:label "Area"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plan:WorkCenter a owl:Class ;
+    rdfs:label "WorkCenter"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plan:WorkUnit a owl:Class ;
+    rdfs:label "WorkUnit"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# PRODUCTION ORDERS & SCHEDULES
+#################################################################
+
+plan:ProductionOrder a owl:Class ;
+    rdfs:label "ProductionOrder"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plan:ProductionSchedule a owl:Class ;
+    rdfs:label "ProductionSchedule"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plan:WorkOrder a owl:Class ;
+    rdfs:label "WorkOrder"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+plan:OperationsDefinition a owl:Class ;
+    rdfs:label "OperationsDefinition"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+plan:partOfSite a owl:ObjectProperty ;
+    rdfs:domain plan:Area ;
+    rdfs:range  plan:Site ;
+    rdfs:subPropertyOf core:partOf .
+
+plan:partOfArea a owl:ObjectProperty ;
+    rdfs:domain plan:WorkCenter ;
+    rdfs:range  plan:Area ;
+    rdfs:subPropertyOf core:partOf .
+
+plan:dueDate a owl:DatatypeProperty ;
+    rdfs:domain plan:ProductionOrder ;
+    rdfs:range  xsd:dateTime .
+
+plan:quantity a owl:DatatypeProperty ;
+    rdfs:domain plan:ProductionOrder ;
+    rdfs:range  xsd:integer .
+
+plan:assignedTo a owl:ObjectProperty ;
+    rdfs:domain plan:WorkOrder ;
+    rdfs:range  plan:WorkCenter .

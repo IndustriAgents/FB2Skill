@@ -1,0 +1,69 @@
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix dct:     <http://purl.org/dc/terms/> .
+@prefix maestro: <https://w3id.org/maestro#> .
+
+#################################################################
+# MAESTRO — TOP-LEVEL UMBRELLA ONTOLOGY
+#
+# Load this single file to get the entire stack.
+# Every module is imported via owl:imports.
+#################################################################
+
+<https://w3id.org/maestro> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/0.4.0> ;
+    rdfs:label    "MAESTRO — Modular Ontology Stack for Future-Proof Manufacturing"@en ;
+    dct:title     "MAESTRO" ;
+    dct:creator   "Melwin Xavier" ;
+    dct:license   <https://opensource.org/licenses/MIT> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment  "Top-level umbrella ontology. Importing this file pulls in every MAESTRO module: core, physical, logical, execution adapters, runtime, cross-cutting concerns, and reasoning. 0.4.0 adds the HHM-Core bridge modules: recipe (ISA-88), policy (ODRL), prov (PROV-O), trace (SAREF4INMA), dpp (DPP/ECLASS), automationml (CAEX) and dtdl."@en ;
+
+    # Core
+    owl:imports <https://w3id.org/maestro/core> ;
+
+    # Physical
+    owl:imports <https://w3id.org/maestro/resource> ;
+    owl:imports <https://w3id.org/maestro/motion> ;
+    owl:imports <https://w3id.org/maestro/automationml> ;
+
+    # Logical
+    owl:imports <https://w3id.org/maestro/skill> ;
+    owl:imports <https://w3id.org/maestro/capability> ;
+    owl:imports <https://w3id.org/maestro/process> ;
+    owl:imports <https://w3id.org/maestro/product> ;
+    owl:imports <https://w3id.org/maestro/recipe> ;
+
+    # Library individuals (reusable skill / motion specifications)
+    owl:imports <https://w3id.org/maestro/skill-lib> ;
+    owl:imports <https://w3id.org/maestro/motion-lib> ;
+
+    # Execution adapters
+    owl:imports <https://w3id.org/maestro/iec61131> ;
+    owl:imports <https://w3id.org/maestro/iec61499> ;
+    owl:imports <https://w3id.org/maestro/ros> ;
+    owl:imports <https://w3id.org/maestro/opcua> ;
+    owl:imports <https://w3id.org/maestro/aas> ;
+    owl:imports <https://w3id.org/maestro/dtdl> ;
+    owl:imports <https://w3id.org/maestro/prov> ;
+    owl:imports <https://w3id.org/maestro/trace> ;
+
+    # Runtime
+    owl:imports <https://w3id.org/maestro/runtime> ;
+    owl:imports <https://w3id.org/maestro/state> ;
+
+    # Cross-cutting
+    owl:imports <https://w3id.org/maestro/sensor> ;
+    owl:imports <https://w3id.org/maestro/unit> ;
+    owl:imports <https://w3id.org/maestro/communication> ;
+    owl:imports <https://w3id.org/maestro/safety> ;
+    owl:imports <https://w3id.org/maestro/quality> ;
+    owl:imports <https://w3id.org/maestro/maintenance> ;
+    owl:imports <https://w3id.org/maestro/energy> ;
+    owl:imports <https://w3id.org/maestro/policy> ;
+    owl:imports <https://w3id.org/maestro/dpp> ;
+
+    # Reasoning
+    owl:imports <https://w3id.org/maestro/reasoning> ;
+    owl:imports <https://w3id.org/maestro/planning> .

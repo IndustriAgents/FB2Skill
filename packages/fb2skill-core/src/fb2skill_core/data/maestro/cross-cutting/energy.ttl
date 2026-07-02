@@ -1,0 +1,63 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix energy: <https://w3id.org/maestro/energy#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/energy> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/energy/0.3.0> ;
+    rdfs:label "MAESTRO Energy Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Energy-aware manufacturing: power, consumption, and carbon footprint per resource and process."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+energy:EnergyConsumer a owl:Class ;
+    rdfs:label "EnergyConsumer"@en ;
+    rdfs:subClassOf core:Resource .
+
+energy:EnergyMeasurement a owl:Class ;
+    rdfs:label "EnergyMeasurement"@en ;
+    rdfs:subClassOf core:Event .
+
+energy:EnergySource a owl:Class ;
+    rdfs:label "EnergySource"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+energy:ElectricalGrid a energy:EnergySource ; rdfs:label "Electrical Grid"@en .
+energy:Solar          a energy:EnergySource ; rdfs:label "Solar"@en .
+energy:Wind           a energy:EnergySource ; rdfs:label "Wind"@en .
+energy:CompressedAir  a energy:EnergySource ; rdfs:label "Compressed Air"@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+energy:powerWatts a owl:DatatypeProperty ;
+    rdfs:label "powerWatts"@en ;
+    rdfs:domain energy:EnergyConsumer ;
+    rdfs:range  xsd:double .
+
+energy:energyKwh a owl:DatatypeProperty ;
+    rdfs:label "energyKwh"@en ;
+    rdfs:domain energy:EnergyMeasurement ;
+    rdfs:range  xsd:double .
+
+energy:carbonGCO2eqPerKwh a owl:DatatypeProperty ;
+    rdfs:label "carbonGCO2eqPerKwh"@en ;
+    rdfs:domain energy:EnergySource ;
+    rdfs:range  xsd:double ;
+    rdfs:comment "Grams CO2-equivalent emitted per kWh produced."@en .
+
+energy:suppliedBy a owl:ObjectProperty ;
+    rdfs:label "suppliedBy"@en ;
+    rdfs:domain energy:EnergyConsumer ;
+    rdfs:range  energy:EnergySource .

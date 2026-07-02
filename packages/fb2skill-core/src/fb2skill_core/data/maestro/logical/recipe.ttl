@@ -1,0 +1,123 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix skill:  <https://w3id.org/maestro/skill#> .
+@prefix prod:   <https://w3id.org/maestro/product#> .
+@prefix plan:   <https://w3id.org/maestro/planning#> .
+@prefix isa88:  <http://www.example.org/ISA-88#> .
+@prefix recipe: <https://w3id.org/maestro/recipe#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#
+# Bridge module — ISA-88 (IEC 61512) procedural model. Closes the
+# HHM-Core recipe/process-plan gap (Priority 2): a neutral Recipe /
+# ProcessPlan whose ordered PlanSteps are realised by MAESTRO skills,
+# sitting between the process taxonomy (process.ttl) and the existing
+# ISA-95 work orders (planning.ttl).
+#
+# Per MAESTRO's import policy only a small bridge axiom is declared;
+# ISA-88 has no single free upstream OWL file, so the isa88: namespace
+# is an illustrative placeholder (matching the gap-analysis report).
+# Replace with a chosen S88 vocabulary in a deployment profile.
+#################################################################
+
+<https://w3id.org/maestro/recipe> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/recipe/0.4.0> ;
+    rdfs:label "MAESTRO Recipe Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ,
+                <https://w3id.org/maestro/product> ,
+                <https://w3id.org/maestro/planning> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "ISA-88 (IEC 61512) procedural recipe model. Recipe maps to an S88 Procedure and PlanStep to a Phase/Operation; each step is realised by a MAESTRO skill. New in 0.4.0 (HHM-Core Priority 2)."@en .
+
+#################################################################
+# CLASSES (ISA-88 procedural alignment)
+#################################################################
+
+recipe:Recipe a owl:Class ;
+    rdfs:label "Recipe"@en ;
+    rdfs:subClassOf core:Process ,
+                    isa88:Procedure ;
+    rdfs:comment "An ordered container of PlanSteps. Subclass of core:Process and ISA-88 Procedure."@en .
+
+recipe:ProcessPlan a owl:Class ;
+    rdfs:label "ProcessPlan"@en ;
+    rdfs:subClassOf recipe:Recipe ;
+    rdfs:comment "A process-plan flavour of Recipe (neutral, technology-independent)."@en .
+
+recipe:UnitProcedure a owl:Class ;
+    rdfs:label "UnitProcedure"@en ;
+    rdfs:subClassOf core:Process ,
+                    isa88:UnitProcedure ;
+    rdfs:comment "ISA-88 Unit Procedure layer between Recipe and Operation."@en .
+
+recipe:Operation a owl:Class ;
+    rdfs:label "Operation"@en ;
+    rdfs:subClassOf core:Process ,
+                    isa88:Operation ;
+    rdfs:comment "ISA-88 Operation layer grouping Phases."@en .
+
+recipe:PlanStep a owl:Class ;
+    rdfs:label "PlanStep"@en ;
+    rdfs:subClassOf core:LogicalEntity ,
+                    isa88:Phase ;
+    rdfs:comment "A single step of a Recipe, realised by a Skill and carrying control-flow and data bindings. Subclass of ISA-88 Phase."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+recipe:hasStep a owl:ObjectProperty ;
+    rdfs:label "hasStep"@en ;
+    rdfs:domain recipe:Recipe ;
+    rdfs:range  recipe:PlanStep ;
+    rdfs:comment "A Recipe contains an ordered PlanStep."@en .
+
+recipe:realizedBy a owl:ObjectProperty ;
+    rdfs:label "realizedBy"@en ;
+    rdfs:domain recipe:PlanStep ;
+    rdfs:range  core:Skill ;
+    rdfs:comment "A PlanStep is realised by a Skill (step-level realization, finer than the Capability-level core:realizedBySkill)."@en .
+
+recipe:hasControlFlow a owl:ObjectProperty ;
+    rdfs:label "hasControlFlow"@en ;
+    rdfs:domain recipe:PlanStep ;
+    rdfs:range  skill:ControlFlow ;
+    rdfs:subPropertyOf skill:hasControlFlow ;
+    rdfs:comment "Control-flow operator (sequence/parallel/alt/loop/optional) governing this PlanStep."@en .
+
+recipe:hasDataBinding a owl:ObjectProperty ;
+    rdfs:label "hasDataBinding"@en ;
+    rdfs:domain recipe:PlanStep ;
+    rdfs:range  skill:DataBinding ;
+    rdfs:subPropertyOf skill:hasDataBinding ;
+    rdfs:comment "A data binding feeding outputs of one step into the inputs of this PlanStep."@en .
+
+recipe:nextStep a owl:ObjectProperty ;
+    rdfs:label "nextStep"@en ;
+    rdfs:domain recipe:PlanStep ;
+    rdfs:range  recipe:PlanStep ;
+    rdfs:comment "The successor PlanStep in sequential flow."@en .
+
+recipe:forFeature a owl:ObjectProperty ;
+    rdfs:label "forFeature"@en ;
+    rdfs:domain recipe:PlanStep ;
+    rdfs:range  prod:Feature ;
+    rdfs:comment "The product Feature this PlanStep produces or operates on."@en .
+
+recipe:requiresOperation a owl:ObjectProperty ;
+    rdfs:label "requiresOperation"@en ;
+    rdfs:domain prod:Feature ;
+    rdfs:range  recipe:PlanStep ;
+    owl:inverseOf recipe:forFeature ;
+    rdfs:comment "A product Feature requires a PlanStep/operation to be produced (HHM-Core Feature requiresOperation PlanStep). Inverse of recipe:forFeature."@en .
+
+recipe:hasContext a owl:ObjectProperty ;
+    rdfs:label "hasContext"@en ;
+    rdfs:domain recipe:Recipe ;
+    rdfs:range  plan:OperationsDefinition ;
+    rdfs:comment "Anchors a Recipe in its ISA-95 / IEC 62264 MOM context (the OperationsDefinition / work order it refines). HHM-Core Recipe context ISA-95."@en .

@@ -1,6 +1,6 @@
 # fb2skill
 
-Convert IEC 61499 function blocks into semantic skill TTL files (CaSk / CaSkMan / ISA-88 / DINEN61360).
+Convert IEC 61499 function blocks into semantic skill TTL files. Two target ontologies are supported: **MAESTRO** (default, https://w3id.org/maestro) and **CaSkMan** (CaSk / ISA-88 / DINEN61360); select with `--ontology` (CLI), the `ontology` form field (REST), or the dropdown on the web Convert page.
 
 IEC 61499 counterpart of [PLC2Skill](https://github.com/hsu-aut/PLC2Skill). PLC2Skill targets IEC 61131-10 PLCopen XML and connects to a live OPC UA server; fb2skill targets `.fbt` files (nxtControl / EcoStruxure) and reads OPC UA node IDs from the deployment artifact offline.
 
@@ -32,7 +32,7 @@ uv run fb2skill -f <project-folder> -o <out-dir> \
                 -e opc.tcp://host:4840 \
                 -bI http://example.org/myproject \
                 -rI my_plc \
-                [--namespace-index 2] [--only sk1,sk2] [--verify]
+                [--ontology maestro|caskman] [--namespace-index 2] [--only sk1,sk2] [--verify]
 
 # REST server (listens on :8000; serves the built SPA at /)
 uv run fb2skill-rest

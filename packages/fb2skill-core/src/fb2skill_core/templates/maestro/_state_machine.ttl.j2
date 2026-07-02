@@ -1,0 +1,40 @@
+# =============================================================================
+# ISA-88 / PackML state machine (state: vocabulary; one transition individual
+# per (source state, transition) edge; command values in guardExpression)
+# =============================================================================
+
+:{{ skill.name }}_StateMachine a state:StateMachine , owl:NamedIndividual ;
+    state:hasTransition
+{% for st in states %}{% set outer_loop = loop %}{% for tr in state_outgoing[st] %}        :{{ skill.name }}_Transition_{{ st }}_{{ tr }}{% if loop.last and outer_loop.last %} .{% else %} ,{% endif %}
+{% endfor %}{% endfor %}
+
+# -----------------------------------------------------------------------------
+# States
+# -----------------------------------------------------------------------------
+
+{% set packml = {"Idle": "Idle", "Execute": "Executing", "Held": "Held", "Aborted": "Aborted"} %}
+{% for st in states %}
+:{{ skill.name }}_State_{{ st }} a core:State{% if st == "Idle" %} , state:InitialState{% endif %} , owl:NamedIndividual ;
+{% if st in packml %}
+    rdfs:seeAlso runtime:{{ packml[st] }} ;
+{% endif %}
+    rdfs:label "{{ st }}" .
+
+{% endfor %}
+# -----------------------------------------------------------------------------
+# Transitions (command transitions carry the SKILL_CMD value as a guard;
+# "state complete" transitions are fired automatically by the FB itself)
+# -----------------------------------------------------------------------------
+
+{% for st in states %}
+{% for tr in state_outgoing[st] %}
+:{{ skill.name }}_Transition_{{ st }}_{{ tr }} a state:Transition , owl:NamedIndividual ;
+    state:source :{{ skill.name }}_State_{{ st }} ;
+    state:target :{{ skill.name }}_State_{{ command_target[tr] if tr in command_target else auto_target[tr] }} ;
+{% if tr in command_target %}
+    state:guardExpression "SKILL_CMD={{ command_code[tr[:-7]] }}" ;
+{% endif %}
+    rdfs:label "{{ st }} -> {{ tr }}" .
+
+{% endfor %}
+{% endfor %}

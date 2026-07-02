@@ -19,6 +19,9 @@ def render_config_for(festo_root):
             namespace_index=2,
             project_label=str(festo_root),
             source_label=opcua_xml.name,
+            # The exemplar TTLs are CaSkMan; pin explicitly since the
+            # RenderConfig default is maestro.
+            ontology="caskman",
         )
     return make
 

@@ -1,0 +1,64 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix prod:   <https://w3id.org/maestro/product#> .
+@prefix eclass: <https://www.w3id.org/eclass#> .
+@prefix dpp:    <https://w3id.org/maestro/dpp#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#
+# Bridge module — Digital Product Passport (ESPR) + ECLASS dictionary.
+# Adds the product-passport view (Priority 4) and gives the existing
+# aas:semanticId a real dictionary to point at. DPP has no single free
+# upstream OWL; ECLASS concepts are referenced via skos:exactMatch to
+# illustrative IRDIs (the eclass: namespace is a placeholder — point a
+# deployment profile at eClassOWL / IEC CDD for the real dictionary).
+#################################################################
+
+<https://w3id.org/maestro/dpp> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/dpp/0.4.0> ;
+    rdfs:label "MAESTRO Digital Product Passport Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/product> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Digital Product Passport view plus ECLASS dictionary alignment for product features/parameters. New in 0.4.0 (HHM-Core Priority 4)."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+dpp:ProductPassport a owl:Class ;
+    rdfs:label "ProductPassport"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A Digital Product Passport: the lifecycle/sustainability dossier of a product."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+dpp:describes a owl:ObjectProperty ;
+    rdfs:label "describes"@en ;
+    rdfs:domain dpp:ProductPassport ;
+    rdfs:range  core:Product ;
+    rdfs:comment "A ProductPassport describes a Product."@en .
+
+dpp:hasIdentifier a owl:ObjectProperty ;
+    rdfs:label "hasIdentifier"@en ;
+    rdfs:domain dpp:ProductPassport ;
+    rdfs:range  prod:Identifier ;
+    rdfs:comment "The scheme-qualified Identifier(s) the passport carries (reuses prod:Identifier)."@en .
+
+#################################################################
+# ECLASS DICTIONARY ALIGNMENT (illustrative)
+#
+# skos:exactMatch links a MAESTRO product Feature to an ECLASS concept
+# IRDI so features/parameters gain standardised dictionary semantics
+# (the same IRDIs aas:semanticId resolves into). The IRI below is an
+# illustrative placeholder — see references and deployment profiles.
+#################################################################
+
+prod:Feature skos:exactMatch eclass:0173-1-01-AKE795 .

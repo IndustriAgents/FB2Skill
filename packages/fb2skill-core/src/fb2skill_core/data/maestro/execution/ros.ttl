@@ -1,0 +1,93 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix skill: <https://w3id.org/maestro/skill#> .
+@prefix ros:   <https://w3id.org/maestro/ros#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/ros> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/ros/0.3.0> ;
+    rdfs:label "MAESTRO ROS Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/skill> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "ROS / ROS 2 execution semantics. ROS nodes implement skills and control resources."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+ros:ROSNode a owl:Class ;
+    rdfs:label "ROSNode"@en ;
+    rdfs:subClassOf core:ControlComponent .
+
+ros:ROSTopic a owl:Class ;
+    rdfs:label "ROSTopic"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+ros:ROSService a owl:Class ;
+    rdfs:label "ROSService"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+ros:ROSAction a owl:Class ;
+    rdfs:label "ROSAction"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+ros:ROSParameter a owl:Class ;
+    rdfs:label "ROSParameter"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+ros:TFFrame a owl:Class ;
+    rdfs:label "TFFrame"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A coordinate frame published on the ROS /tf tree."@en .
+
+ros:MoveItController a owl:Class ;
+    rdfs:label "MoveItController"@en ;
+    rdfs:subClassOf ros:ROSNode .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+ros:publishes a owl:ObjectProperty ;
+    rdfs:label "publishes"@en ;
+    rdfs:domain ros:ROSNode ;
+    rdfs:range  ros:ROSTopic .
+
+ros:subscribes a owl:ObjectProperty ;
+    rdfs:label "subscribes"@en ;
+    rdfs:domain ros:ROSNode ;
+    rdfs:range  ros:ROSTopic .
+
+ros:advertisesService a owl:ObjectProperty ;
+    rdfs:label "advertisesService"@en ;
+    rdfs:domain ros:ROSNode ;
+    rdfs:range  ros:ROSService .
+
+ros:advertisesAction a owl:ObjectProperty ;
+    rdfs:label "advertisesAction"@en ;
+    rdfs:domain ros:ROSNode ;
+    rdfs:range  ros:ROSAction .
+
+ros:implementsSkill a owl:ObjectProperty ;
+    rdfs:label "implementsSkill"@en ;
+    rdfs:domain ros:ROSNode ;
+    rdfs:range  core:Skill ;
+    rdfs:subPropertyOf core:implements .
+
+ros:controlsResource a owl:ObjectProperty ;
+    rdfs:label "controlsResource"@en ;
+    rdfs:domain ros:ROSNode ;
+    rdfs:range  core:Resource ;
+    rdfs:subPropertyOf core:controls .
+
+ros:rosVersion a owl:DatatypeProperty ;
+    rdfs:label "rosVersion"@en ;
+    rdfs:range xsd:string ;
+    rdfs:comment "ROS distribution / version (e.g. 'humble', 'iron', 'jazzy')."@en .

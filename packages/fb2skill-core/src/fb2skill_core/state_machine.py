@@ -124,6 +124,14 @@ IEC_TYPE_MAP: dict[str, str] = {
     "WSTRING": "string",
 }
 
+# Normalized sk_type -> XSD datatype IRI (for MAESTRO skill:paramType).
+SK_TYPE_XSD: dict[str, str] = {
+    "int": "http://www.w3.org/2001/XMLSchema#integer",
+    "float": "http://www.w3.org/2001/XMLSchema#double",
+    "bool": "http://www.w3.org/2001/XMLSchema#boolean",
+    "string": "http://www.w3.org/2001/XMLSchema#string",
+}
+
 IEC_TYPE_DEFAULT: dict[str, str] = {
     "int": "0",
     "float": "0.0",

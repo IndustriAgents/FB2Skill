@@ -1,0 +1,94 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix safety: <https://w3id.org/maestro/safety#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/safety> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/safety/0.4.0> ;
+    rdfs:label "MAESTRO Safety Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Functional safety vocabulary aligned with IEC 61508 and ISO 13849. 0.4.0 promotes mitigation to a class and adds Hazard→Risk / Mitigation→Risk relations (HHM-Core Priority 3)."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+safety:SafetyFunction a owl:Class ;
+    rdfs:label "SafetyFunction"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A function intended to maintain or achieve a safe state (IEC 61508)."@en .
+
+safety:Hazard a owl:Class ;
+    rdfs:label "Hazard"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+safety:Risk a owl:Class ;
+    rdfs:label "Risk"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+safety:SafetyIntegrityLevel a owl:Class ;
+    rdfs:label "SafetyIntegrityLevel"@en ;
+    rdfs:comment "IEC 61508 SIL (SIL1 … SIL4)."@en .
+
+safety:SIL1 a safety:SafetyIntegrityLevel ; rdfs:label "SIL 1"@en .
+safety:SIL2 a safety:SafetyIntegrityLevel ; rdfs:label "SIL 2"@en .
+safety:SIL3 a safety:SafetyIntegrityLevel ; rdfs:label "SIL 3"@en .
+safety:SIL4 a safety:SafetyIntegrityLevel ; rdfs:label "SIL 4"@en .
+
+safety:PerformanceLevel a owl:Class ;
+    rdfs:label "PerformanceLevel"@en ;
+    rdfs:comment "ISO 13849 Performance Level (PL a … PL e)."@en .
+
+safety:PLa a safety:PerformanceLevel ; rdfs:label "PL a"@en .
+safety:PLb a safety:PerformanceLevel ; rdfs:label "PL b"@en .
+safety:PLc a safety:PerformanceLevel ; rdfs:label "PL c"@en .
+safety:PLd a safety:PerformanceLevel ; rdfs:label "PL d"@en .
+safety:PLe a safety:PerformanceLevel ; rdfs:label "PL e"@en .
+
+safety:EmergencyStop a owl:Class ;
+    rdfs:label "EmergencyStop"@en ;
+    rdfs:subClassOf safety:SafetyFunction .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+safety:hasSIL a owl:ObjectProperty ;
+    rdfs:domain safety:SafetyFunction ;
+    rdfs:range  safety:SafetyIntegrityLevel .
+
+safety:hasPerformanceLevel a owl:ObjectProperty ;
+    rdfs:domain safety:SafetyFunction ;
+    rdfs:range  safety:PerformanceLevel .
+
+safety:mitigates a owl:ObjectProperty ;
+    rdfs:domain safety:SafetyFunction ;
+    rdfs:range  safety:Hazard .
+
+#################################################################
+# MITIGATION AS A CLASS + RISK RELATIONS (new 0.4.0, HHM-Core P3)
+#################################################################
+
+safety:Mitigation a owl:Class ;
+    rdfs:label "Mitigation"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A reified mitigation measure that reduces a Risk. Promotes the safety:mitigates relation to a first-class object, mirroring HHM-Core Mitigation."@en .
+
+safety:increases a owl:ObjectProperty ;
+    rdfs:label "increases"@en ;
+    rdfs:domain safety:Hazard ;
+    rdfs:range  safety:Risk ;
+    rdfs:comment "A Hazard increases a Risk (HHM-Core Hazard→Risk edge)."@en .
+
+safety:reduces a owl:ObjectProperty ;
+    rdfs:label "reduces"@en ;
+    rdfs:domain safety:Mitigation ;
+    rdfs:range  safety:Risk ;
+    rdfs:comment "A Mitigation reduces a Risk (HHM-Core Mitigation→Risk edge)."@en .

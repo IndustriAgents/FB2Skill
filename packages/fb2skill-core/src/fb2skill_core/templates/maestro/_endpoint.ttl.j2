@@ -1,0 +1,22 @@
+# =============================================================================
+# OPC UA endpoint, binding and operation signature
+# =============================================================================
+
+:{{ skill.name }}_Endpoint a com:Endpoint , owl:NamedIndividual ;
+    core:identifier "{{ skill.name }}_Endpoint" ;
+    com:address "{{ config.endpoint_url }}" ;
+    com:usesProtocol com:OpcUaProtocol ;
+    com:hasBinding :{{ skill.name }}_Binding .
+
+:{{ skill.name }}_Binding a com:Binding , owl:NamedIndividual ;
+    com:bindsEndpoint :{{ skill.name }}_Endpoint ;
+    com:specializesAs com:OpcUaProtocol ;
+    com:hasSignature :{{ skill.name }}_Signature .
+
+:{{ skill.name }}_Signature a com:OperationSignature , owl:NamedIndividual{% if skill.parameters %} ;
+    com:hasParameterDef
+{% for v in skill.parameters %}        :{{ skill.name }}_Param_{{ v.name }}{% if not loop.last %} ,
+{% endif %}{% endfor %}{% endif %}{% if skill.outputs %} ;
+    com:returns
+{% for v in skill.outputs %}        :{{ skill.name }}_Param_{{ v.name }}{% if not loop.last %} ,
+{% endif %}{% endfor %}{% endif %} .

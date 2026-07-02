@@ -1,0 +1,102 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix motion: <https://w3id.org/maestro/motion#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/motion> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/motion/0.3.0> ;
+    rdfs:label "MAESTRO Motion Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Machine-independent motion semantics. Must remain independent of ROS, PLCs, and IEC 61499."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+motion:Motion a owl:Class ;
+    rdfs:label "Motion"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A geometric/kinematic movement abstraction."@en .
+
+motion:LinearMotion a owl:Class ;
+    rdfs:label "LinearMotion"@en ;
+    rdfs:subClassOf motion:Motion .
+
+motion:RotationalMotion a owl:Class ;
+    rdfs:label "RotationalMotion"@en ;
+    rdfs:subClassOf motion:Motion .
+
+motion:JointMotion a owl:Class ;
+    rdfs:label "JointMotion"@en ;
+    rdfs:subClassOf motion:Motion ;
+    rdfs:comment "Motion specified in joint space."@en .
+
+motion:CartesianMotion a owl:Class ;
+    rdfs:label "CartesianMotion"@en ;
+    rdfs:subClassOf motion:Motion ;
+    rdfs:comment "Motion specified in Cartesian/task space."@en .
+
+motion:SynchronizedMotion a owl:Class ;
+    rdfs:label "SynchronizedMotion"@en ;
+    rdfs:subClassOf motion:Motion ;
+    rdfs:comment "Coordinated motion of multiple resources."@en .
+
+motion:TrajectoryMotion a owl:Class ;
+    rdfs:label "TrajectoryMotion"@en ;
+    rdfs:subClassOf motion:Motion ;
+    rdfs:comment "Motion defined by a parametric trajectory."@en .
+
+motion:ForceControlledMotion a owl:Class ;
+    rdfs:label "ForceControlledMotion"@en ;
+    rdfs:subClassOf motion:Motion ;
+    rdfs:comment "Motion regulated by force/torque feedback."@en .
+
+motion:CoordinateFrame a owl:Class ;
+    rdfs:label "CoordinateFrame"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+motion:Axis a owl:Class ;
+    rdfs:label "Axis"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+# NOTE (0.3.0): Canonical motion specification individuals
+# (LinearMotionSpec, JointMotionSpec, CartesianMotionSpec) moved to
+# ontologies/lib/motion-lib.ttl. The motion: namespace now contains only
+# vocabulary (classes + properties).
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+motion:hasVelocity a owl:DatatypeProperty ;
+    rdfs:label "hasVelocity"@en ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Linear velocity in m/s or angular velocity in rad/s, depending on motion subtype."@en .
+
+motion:hasAcceleration a owl:DatatypeProperty ;
+    rdfs:label "hasAcceleration"@en ;
+    rdfs:range xsd:float .
+
+motion:hasPrecision a owl:DatatypeProperty ;
+    rdfs:label "hasPrecision"@en ;
+    rdfs:range xsd:float ;
+    rdfs:comment "Repeatability / positioning precision in mm."@en .
+
+motion:hasCoordinateFrame a owl:ObjectProperty ;
+    rdfs:label "hasCoordinateFrame"@en ;
+    rdfs:range motion:CoordinateFrame .
+
+motion:requiresAxis a owl:ObjectProperty ;
+    rdfs:label "requiresAxis"@en ;
+    rdfs:range motion:Axis .
+
+motion:numberOfAxes a owl:DatatypeProperty ;
+    rdfs:label "numberOfAxes"@en ;
+    rdfs:range xsd:integer .

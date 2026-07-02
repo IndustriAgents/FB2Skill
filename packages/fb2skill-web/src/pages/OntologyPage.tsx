@@ -1,17 +1,49 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { fetchOntology } from "../api/client";
+import { fetchOntologies, fetchOntologyFile } from "../api/client";
+import type { OntologyInfo } from "../types/api";
 import TtlViewer from "../components/TtlViewer";
 
 export default function OntologyPage() {
+  const [ontologies, setOntologies] = useState<OntologyInfo[] | null>(null);
+  const [selected, setSelected] = useState<string>("maestro");
+  const [activeFile, setActiveFile] = useState<string | null>(null);
   const [ttl, setTtl] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  const current = ontologies?.find((o) => o.id === selected) ?? null;
+
   useEffect(() => {
-    fetchOntology()
-      .then(setTtl)
+    fetchOntologies()
+      .then((r) => {
+        setOntologies(r.ontologies);
+        const first = r.ontologies.find((o) => o.id === "maestro") ?? r.ontologies[0];
+        if (first) setActiveFile(first.groups[0]?.files[0] ?? null);
+      })
       .catch((e) => setErr(String(e)));
   }, []);
+
+  function selectOntology(o: OntologyInfo) {
+    setSelected(o.id);
+    setActiveFile(o.groups[0]?.files[0] ?? null);
+  }
+
+  useEffect(() => {
+    if (!activeFile) return;
+    let stale = false;
+    setTtl(null);
+    setErr(null);
+    fetchOntologyFile(selected, activeFile)
+      .then((t) => {
+        if (!stale) setTtl(t);
+      })
+      .catch((e) => {
+        if (!stale) setErr(String(e));
+      });
+    return () => {
+      stale = true;
+    };
+  }, [selected, activeFile]);
 
   const stats = useMemo(() => {
     if (!ttl) return null;
@@ -31,33 +63,53 @@ export default function OntologyPage() {
   }, [ttl]);
 
   function download() {
-    if (!ttl) return;
+    if (!ttl || !activeFile) return;
     const blob = new Blob([ttl], { type: "text/turtle" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "CaSkMan_v4.3.0.ttl";
+    a.download = activeFile.split("/").pop()!;
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  const isMulti = (current?.groups.length ?? 0) > 1;
 
   return (
     <div>
       <div className="view-head">
         <div>
           <h1>
-            <em>CaSkMan</em> ontology
+            <em>{current?.label ?? "Ontology"}</em> ontology
           </h1>
           <p className="view-sub">
-            Bundled <code>CaSkMan_v4.3.0.ttl</code> served by{" "}
-            <code>GET /ontology</code>.
+            {current
+              ? `${current.label} ${current.version}` +
+                (current.baseIri ? ` · ${current.baseIri}` : "")
+              : "Bundled target ontologies."}
           </p>
         </div>
-        {ttl && (
-          <button type="button" className="btn" onClick={download}>
-            Download .ttl
-          </button>
-        )}
+        <div className="view-actions" style={{ display: "flex", gap: 8 }}>
+          {ontologies && (
+            <div className="tabs" style={{ borderBottom: "none" }}>
+              {ontologies.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => selectOntology(o)}
+                  className={`tab${selected === o.id ? " is-active" : ""}`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {ttl && (
+            <button type="button" className="btn" onClick={download}>
+              Download .ttl
+            </button>
+          )}
+        </div>
       </div>
 
       {err && (
@@ -97,26 +149,97 @@ export default function OntologyPage() {
         </div>
       )}
 
-      <div className="card">
-        <div className="card-head">
-          <h3>Turtle source</h3>
-          <span className="card-meta">CaSkMan v4.3.0</span>
-        </div>
-        <div className="card-body" style={{ padding: 0 }}>
-          {ttl ? (
-            <TtlViewer ttl={ttl} maxHeight="68vh" />
-          ) : !err ? (
-            <div
-              style={{
-                padding: "48px 16px",
-                textAlign: "center",
-                color: "var(--cream-faint)",
-                fontSize: 13,
-              }}
-            >
-              Loading ontology…
+      <div
+        style={
+          isMulti
+            ? {
+                display: "grid",
+                gridTemplateColumns: "230px minmax(0, 1fr)",
+                gap: 18,
+                alignItems: "start",
+              }
+            : undefined
+        }
+      >
+        {isMulti && current && (
+          <div className="card">
+            <div className="card-head">
+              <h3>Modules</h3>
+              <span className="card-meta">{current.version}</span>
             </div>
-          ) : null}
+            <div
+              className="card-body"
+              style={{ padding: "8px 0", maxHeight: "68vh", overflowY: "auto" }}
+            >
+              {current.groups.map((g) => (
+                <div key={g.id} style={{ padding: "6px 0" }}>
+                  <div
+                    style={{
+                      padding: "4px 16px",
+                      fontSize: 10.5,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "var(--cream-faint)",
+                    }}
+                  >
+                    {g.label}
+                  </div>
+                  {g.files.map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setActiveFile(f)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "5px 16px",
+                        fontSize: 12,
+                        fontFamily: "var(--mono)",
+                        background:
+                          activeFile === f
+                            ? "rgba(255,255,255,0.06)"
+                            : "transparent",
+                        color:
+                          activeFile === f
+                            ? "var(--accent)"
+                            : "var(--cream-dim)",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {f.split("/").pop()}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="card">
+          <div className="card-head">
+            <h3>Turtle source</h3>
+            <span className="card-meta">
+              {activeFile ?? "select a file"}
+            </span>
+          </div>
+          <div className="card-body" style={{ padding: 0 }}>
+            {ttl ? (
+              <TtlViewer ttl={ttl} maxHeight="68vh" />
+            ) : !err ? (
+              <div
+                style={{
+                  padding: "48px 16px",
+                  textAlign: "center",
+                  color: "var(--cream-faint)",
+                  fontSize: 13,
+                }}
+              >
+                Loading ontology…
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

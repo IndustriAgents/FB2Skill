@@ -1,0 +1,113 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:  <https://w3id.org/maestro/core#> .
+@prefix cap:   <https://w3id.org/maestro/capability#> .
+@prefix proc:  <https://w3id.org/maestro/process#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/process> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/process/0.3.0> ;
+    rdfs:label "MAESTRO Process Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/capability> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Manufacturing processes aligned with DIN 8580 (process taxonomy) and VDI 3682 (process description)."@en .
+
+#################################################################
+# CLASSES (DIN 8580 process families)
+#################################################################
+
+proc:ManufacturingProcess a owl:Class ;
+    rdfs:label "ManufacturingProcess"@en ;
+    rdfs:subClassOf core:Process .
+
+proc:PrimaryShaping a owl:Class ;
+    rdfs:label "PrimaryShaping"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess ;
+    rdfs:comment "DIN 8580 Group 1 — casting, sintering."@en .
+
+proc:Forming a owl:Class ;
+    rdfs:label "Forming"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess ;
+    rdfs:comment "DIN 8580 Group 2 — bending, drawing, forging."@en .
+
+proc:Separating a owl:Class ;
+    rdfs:label "Separating"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess ;
+    rdfs:comment "DIN 8580 Group 3 — cutting, machining."@en .
+
+proc:MachiningProcess a owl:Class ;
+    rdfs:label "MachiningProcess"@en ;
+    rdfs:subClassOf proc:Separating .
+
+proc:JoiningProcess a owl:Class ;
+    rdfs:label "JoiningProcess"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess ;
+    rdfs:comment "DIN 8580 Group 4 — welding, screwing, gluing."@en .
+
+proc:AssemblyProcess a owl:Class ;
+    rdfs:label "AssemblyProcess"@en ;
+    rdfs:subClassOf proc:JoiningProcess .
+
+proc:Coating a owl:Class ;
+    rdfs:label "Coating"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess ;
+    rdfs:comment "DIN 8580 Group 5."@en .
+
+proc:MaterialPropertyChange a owl:Class ;
+    rdfs:label "MaterialPropertyChange"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess ;
+    rdfs:comment "DIN 8580 Group 6 — heat treatment."@en .
+
+#################################################################
+# AUXILIARY PROCESSES
+#################################################################
+
+proc:HandlingProcess a owl:Class ;
+    rdfs:label "HandlingProcess"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess .
+
+proc:TransportProcess a owl:Class ;
+    rdfs:label "TransportProcess"@en ;
+    rdfs:subClassOf proc:HandlingProcess .
+
+proc:InspectionProcess a owl:Class ;
+    rdfs:label "InspectionProcess"@en ;
+    rdfs:subClassOf proc:ManufacturingProcess .
+
+#################################################################
+# PROCESS RELATIONS
+#################################################################
+
+proc:precedes a owl:ObjectProperty ;
+    rdfs:label "precedes"@en ;
+    rdfs:domain proc:ManufacturingProcess ;
+    rdfs:range  proc:ManufacturingProcess ;
+    owl:inverseOf proc:follows .
+
+proc:follows a owl:ObjectProperty ;
+    rdfs:label "follows"@en ;
+    rdfs:domain proc:ManufacturingProcess ;
+    rdfs:range  proc:ManufacturingProcess .
+
+proc:parallelWith a owl:ObjectProperty ;
+    rdfs:label "parallelWith"@en ;
+    rdfs:domain proc:ManufacturingProcess ;
+    rdfs:range  proc:ManufacturingProcess ;
+    a owl:SymmetricProperty .
+
+proc:requiresCapability a owl:ObjectProperty ;
+    rdfs:label "requiresCapability"@en ;
+    rdfs:domain proc:ManufacturingProcess ;
+    rdfs:range  core:Capability ;
+    rdfs:subPropertyOf core:requiresCapability .
+
+proc:producesState a owl:ObjectProperty ;
+    rdfs:label "producesState"@en ;
+    rdfs:domain proc:ManufacturingProcess ;
+    rdfs:range  core:State .

@@ -1,0 +1,62 @@
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix core: <https://w3id.org/maestro/core#> .
+@prefix qa:   <https://w3id.org/maestro/quality#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/quality> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/quality/0.3.0> ;
+    rdfs:label "MAESTRO Quality Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ;
+    owl:versionInfo "0.3.0" ;
+    rdfs:comment "Quality management vocabulary aligned with ISO 9001."@en .
+
+#################################################################
+# CLASSES
+#################################################################
+
+qa:QualityCheck a owl:Class ;
+    rdfs:label "QualityCheck"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+qa:Defect a owl:Class ;
+    rdfs:label "Defect"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+qa:NonConformance a owl:Class ;
+    rdfs:label "NonConformance"@en ;
+    rdfs:subClassOf core:Event .
+
+qa:InspectionResult a owl:Class ;
+    rdfs:label "InspectionResult"@en ;
+    rdfs:subClassOf core:LogicalEntity .
+
+qa:Pass a qa:InspectionResult ; rdfs:label "Pass"@en .
+qa:Fail a qa:InspectionResult ; rdfs:label "Fail"@en .
+qa:Rework a qa:InspectionResult ; rdfs:label "Rework"@en .
+
+qa:KPI a owl:Class ;
+    rdfs:label "KPI"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "Key performance indicator (OEE, FPY, scrap rate, …)."@en .
+
+#################################################################
+# PROPERTIES
+#################################################################
+
+qa:hasResult a owl:ObjectProperty ;
+    rdfs:domain qa:QualityCheck ;
+    rdfs:range  qa:InspectionResult .
+
+qa:detected a owl:ObjectProperty ;
+    rdfs:domain qa:QualityCheck ;
+    rdfs:range  qa:Defect .
+
+qa:kpiValue a owl:DatatypeProperty ;
+    rdfs:domain qa:KPI ;
+    rdfs:range  xsd:double .

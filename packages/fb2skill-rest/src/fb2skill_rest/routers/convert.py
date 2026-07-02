@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
-from fb2skill_core.config import RenderConfig
+from fb2skill_core.config import ONTOLOGIES, RenderConfig
 
 from ..schemas.convert import ConvertResponse
 from ..services.conversion import ConversionError, convert_zip
@@ -17,7 +17,13 @@ async def convert(
     namespace_index: int = Form(2),
     only: str = Form(""),
     opcua_xml_rel_path: str = Form(""),
+    ontology: str = Form("maestro"),
 ) -> ConvertResponse:
+    if ontology not in ONTOLOGIES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"unknown ontology {ontology!r}; expected one of {list(ONTOLOGIES)}",
+        )
     only_tuple = tuple(s for s in only.split(",") if s)
     render_config = RenderConfig(
         endpoint_url=endpoint_url,
@@ -25,6 +31,7 @@ async def convert(
         resource=resource,
         namespace_index=namespace_index,
         only=only_tuple,
+        ontology=ontology,
     )
     zip_bytes = await project_zip.read()
     try:

@@ -1,0 +1,323 @@
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix core:   <https://w3id.org/maestro/core#> .
+@prefix motion: <https://w3id.org/maestro/motion#> .
+@prefix unit:   <https://w3id.org/maestro/unit#> .
+@prefix skill:  <https://w3id.org/maestro/skill#> .
+
+#################################################################
+# ONTOLOGY DECLARATION
+#################################################################
+
+<https://w3id.org/maestro/skill> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/maestro/skill/0.4.0> ;
+    rdfs:label "MAESTRO Skill Ontology"@en ;
+    owl:imports <https://w3id.org/maestro/core> ,
+                <https://w3id.org/maestro/motion> ,
+                <https://w3id.org/maestro/unit> ;
+    owl:versionInfo "0.4.0" ;
+    rdfs:comment "Keystone of skill-based manufacturing. Skills are logical — they are NOT ROS nodes, PLC FBs, or IEC 61499 FBs. Execution technologies IMPLEMENT skills. 0.4.0 adds reified orchestration (SubSkillLink, ControlFlow, DataBinding), typed parameters (ParameterDef/ParameterValue), Precondition/Effect classes and a protocol-neutral SkillInterface/SkillService — closing the HHM-Core skill-orchestration gap (Priority 1)."@en .
+
+#################################################################
+# TOP-LEVEL SKILL CLASSES
+#################################################################
+
+skill:AtomicSkill a owl:Class ;
+    rdfs:label "AtomicSkill"@en ;
+    rdfs:subClassOf core:Skill ;
+    rdfs:comment "An indivisible skill primitive."@en .
+
+skill:CompositeSkill a owl:Class ;
+    rdfs:label "CompositeSkill"@en ;
+    rdfs:subClassOf core:Skill ;
+    rdfs:comment "A skill built by composing other skills via skill:composedOfSkill."@en .
+
+#################################################################
+# ATOMIC SKILL CATEGORIES (VDI 2860 aligned)
+#################################################################
+
+skill:MotionSkill a owl:Class ;
+    rdfs:label "MotionSkill"@en ;
+    rdfs:subClassOf skill:AtomicSkill ;
+    rdfs:comment "Skills that produce kinematic motion (move linear, move joint, …)."@en .
+
+skill:ManipulationSkill a owl:Class ;
+    rdfs:label "ManipulationSkill"@en ;
+    rdfs:subClassOf skill:AtomicSkill ;
+    rdfs:comment "Skills that change the spatial relation between a resource and a workpiece (grasp, pick, place, release)."@en .
+
+skill:HandlingSkill a owl:Class ;
+    rdfs:label "HandlingSkill"@en ;
+    rdfs:subClassOf skill:AtomicSkill ;
+    rdfs:comment "VDI 2860 handling skills (orient, position, deposit, secure)."@en .
+
+skill:InspectionSkill a owl:Class ;
+    rdfs:label "InspectionSkill"@en ;
+    rdfs:subClassOf skill:AtomicSkill .
+
+#################################################################
+# COMPOSITE SKILL CATEGORIES
+#################################################################
+
+skill:AssemblySkill a owl:Class ;
+    rdfs:label "AssemblySkill"@en ;
+    rdfs:subClassOf skill:CompositeSkill .
+
+skill:WeldingSkill a owl:Class ;
+    rdfs:label "WeldingSkill"@en ;
+    rdfs:subClassOf skill:CompositeSkill .
+
+skill:CoordinationSkill a owl:Class ;
+    rdfs:label "CoordinationSkill"@en ;
+    rdfs:subClassOf skill:CompositeSkill .
+
+skill:ProcessSkill a owl:Class ;
+    rdfs:label "ProcessSkill"@en ;
+    rdfs:subClassOf skill:CompositeSkill .
+
+skill:TransferSkill a owl:Class ;
+    rdfs:label "TransferSkill"@en ;
+    rdfs:subClassOf skill:CompositeSkill ;
+    rdfs:comment "A composite skill: pick at A, move to B, place at B."@en .
+
+#################################################################
+# SKILL PROPERTIES
+#################################################################
+
+skill:hasPrecondition a owl:ObjectProperty ;
+    rdfs:label "hasPrecondition"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range core:LogicalEntity ;
+    rdfs:comment "A Skill's precondition. Target is either a core:State (shortcut form) or a reified skill:Precondition."@en .
+
+skill:hasPostcondition a owl:ObjectProperty ;
+    rdfs:label "hasPostcondition"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range core:LogicalEntity ;
+    rdfs:comment "A Skill's postcondition/effect. Target is either a core:State (shortcut form) or a reified skill:Postcondition / skill:Effect."@en .
+
+skill:requiresCapability a owl:ObjectProperty ;
+    rdfs:label "requiresCapability"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  core:Capability ;
+    rdfs:comment "A Skill requires a Capability (HHM-Core Skill requiresCapability Capability). NOT a sub-property of the Process-level core:requiresCapability: that property's domain is core:Process, which is owl:disjointWith core:Skill, so sub-propertying would make a Skill an illegal Skill∩Process."@en .
+
+skill:hasParameter a owl:ObjectProperty ;
+    rdfs:label "hasParameter"@en ;
+    rdfs:domain core:Skill .
+
+skill:composedOfSkill a owl:ObjectProperty ;
+    rdfs:label "composedOfSkill"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  core:Skill ;
+    rdfs:subPropertyOf core:composedOfSkill ;
+    rdfs:comment "A composite Skill has another Skill as a constituent step."@en .
+
+skill:requiresMotion a owl:ObjectProperty ;
+    rdfs:label "requiresMotion"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  motion:Motion ;
+    rdfs:subPropertyOf core:requiresMotion ;
+    rdfs:comment "A Skill requires a reusable technology-neutral Motion specification."@en .
+
+skill:expectedDurationSeconds a owl:DatatypeProperty ;
+    rdfs:label "expectedDurationSeconds"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range xsd:float .
+
+#################################################################
+# DISJOINTNESS
+#################################################################
+
+skill:AtomicSkill owl:disjointWith skill:CompositeSkill .
+
+# NOTE (0.3.0): Reusable skill individuals (MoveLinear, MoveJoint, VacuumPick,
+# Release, Transfer) were moved out of this file into
+# ontologies/lib/skill-lib.ttl so that the skill: namespace contains only
+# vocabulary (classes + properties) and the skill-lib: namespace contains
+# instance data. See decisions/0003-vocabulary-vs-instances.md.
+
+#################################################################
+# SKILL ORCHESTRATION — REIFIED COMPOSITION (new 0.4.0, HHM-Core P1)
+#
+# HHM-Core reifies the composite→sub-skill edge so that control-flow
+# and data-flow can attach to each link. skill:composedOfSkill stays as
+# the plain shortcut; skill:SubSkillLink is the reified form.
+#################################################################
+
+skill:SubSkillLink a owl:Class ;
+    rdfs:label "SubSkillLink"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A reified composition link from a CompositeSkill to one constituent Skill, so that control-flow (skill:hasControlFlow) and data bindings (skill:hasDataBinding) can be attached per edge. Mirrors HHM-Core SubSkillLink."@en .
+
+skill:hasSubSkillLink a owl:ObjectProperty ;
+    rdfs:label "hasSubSkillLink"@en ;
+    rdfs:domain skill:CompositeSkill ;
+    rdfs:range  skill:SubSkillLink ;
+    rdfs:comment "A CompositeSkill carries reified SubSkillLinks to its constituents."@en .
+
+skill:linksTo a owl:ObjectProperty ;
+    rdfs:label "linksTo"@en ;
+    rdfs:domain skill:SubSkillLink ;
+    rdfs:range  core:Skill ;
+    rdfs:comment "The constituent Skill referenced by a SubSkillLink."@en .
+
+#################################################################
+# CONTROL FLOW
+#################################################################
+
+skill:ControlFlow a owl:Class ;
+    rdfs:label "ControlFlow"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "Branching/looping/optional control between skill steps. Subclasses give the operator; the existing proc:precedes/follows/parallelWith cover the process-level ordering."@en .
+
+skill:Sequence    a owl:Class ; rdfs:label "Sequence"@en    ; rdfs:subClassOf skill:ControlFlow .
+skill:Parallel    a owl:Class ; rdfs:label "Parallel"@en    ; rdfs:subClassOf skill:ControlFlow .
+skill:Alternative a owl:Class ; rdfs:label "Alternative"@en ; rdfs:subClassOf skill:ControlFlow ;
+    rdfs:comment "Exclusive choice (alt / branch)."@en .
+skill:Loop        a owl:Class ; rdfs:label "Loop"@en        ; rdfs:subClassOf skill:ControlFlow .
+skill:Optional    a owl:Class ; rdfs:label "Optional"@en    ; rdfs:subClassOf skill:ControlFlow .
+
+skill:hasControlFlow a owl:ObjectProperty ;
+    rdfs:label "hasControlFlow"@en ;
+    rdfs:domain core:LogicalEntity ;
+    rdfs:range  skill:ControlFlow ;
+    rdfs:comment "Control-flow operator governing a SubSkillLink or a recipe:PlanStep. Domain kept general (core:LogicalEntity) so RDFS domain inference does not conflate PlanSteps with SubSkillLinks."@en .
+
+#################################################################
+# DATA BINDING (output of one skill → input of another)
+#################################################################
+
+skill:DataBinding a owl:Class ;
+    rdfs:label "DataBinding"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "Binds a producing skill's output parameter to a consuming skill's input parameter. Mirrors HHM-Core DataBinding."@en .
+
+skill:hasDataBinding a owl:ObjectProperty ;
+    rdfs:label "hasDataBinding"@en ;
+    rdfs:domain core:LogicalEntity ;
+    rdfs:range  skill:DataBinding ;
+    rdfs:comment "Attaches a DataBinding to a SubSkillLink or recipe:PlanStep."@en .
+
+skill:bindsFrom a owl:ObjectProperty ;
+    rdfs:label "bindsFrom"@en ;
+    rdfs:domain skill:DataBinding ;
+    rdfs:range  skill:ParameterDef ;
+    rdfs:comment "Source (producing) parameter of a DataBinding."@en .
+
+skill:bindsTo a owl:ObjectProperty ;
+    rdfs:label "bindsTo"@en ;
+    rdfs:domain skill:DataBinding ;
+    rdfs:range  skill:ParameterDef ;
+    rdfs:comment "Target (consuming) parameter of a DataBinding."@en .
+
+#################################################################
+# TYPED PARAMETERS — ParameterDef (type/unit/range) + ParameterValue
+#################################################################
+
+skill:ParameterDef a owl:Class ;
+    rdfs:label "ParameterDef"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "Typed parameter definition of a Skill: a data type, an optional unit reference and an optional numeric range. Replaces the untyped skill:hasParameter target."@en .
+
+skill:ParameterValue a owl:Class ;
+    rdfs:label "ParameterValue"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "An instance-level value supplied for a ParameterDef (e.g. at a SkillExecution)."@en .
+
+skill:hasParameterDef a owl:ObjectProperty ;
+    rdfs:label "hasParameterDef"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  skill:ParameterDef ;
+    rdfs:comment "A Skill declares a typed ParameterDef. Typed successor of skill:hasParameter."@en .
+
+skill:paramType a owl:DatatypeProperty ;
+    rdfs:label "paramType"@en ;
+    rdfs:domain skill:ParameterDef ;
+    rdfs:range  xsd:anyURI ;
+    rdfs:comment "Data type of the parameter, given as an XSD datatype IRI (e.g. xsd:double)."@en .
+
+skill:unitRef a owl:ObjectProperty ;
+    rdfs:label "unitRef"@en ;
+    rdfs:domain skill:ParameterDef ;
+    rdfs:range  unit:Unit ;
+    rdfs:comment "QUDT-aligned unit of the parameter, via unit:Unit."@en .
+
+skill:minValue a owl:DatatypeProperty ;
+    rdfs:label "minValue"@en ;
+    rdfs:domain skill:ParameterDef ;
+    rdfs:range  xsd:double .
+
+skill:maxValue a owl:DatatypeProperty ;
+    rdfs:label "maxValue"@en ;
+    rdfs:domain skill:ParameterDef ;
+    rdfs:range  xsd:double .
+
+skill:instanceOf a owl:ObjectProperty ;
+    rdfs:label "instanceOf"@en ;
+    rdfs:domain skill:ParameterValue ;
+    rdfs:range  skill:ParameterDef ;
+    rdfs:comment "Links a ParameterValue to the ParameterDef it instantiates."@en .
+
+skill:value a owl:DatatypeProperty ;
+    rdfs:label "value"@en ;
+    rdfs:domain skill:ParameterValue ;
+    rdfs:comment "The supplied literal value of a ParameterValue."@en .
+
+#################################################################
+# PRECONDITION / EFFECT (promoted to classes; properties unchanged)
+#################################################################
+
+skill:Precondition a owl:Class ;
+    rdfs:label "Precondition"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A condition that must hold before a Skill runs, expressed over core:State via skill:refersToState. The plain skill:hasPrecondition (Skill→State) shortcut is retained."@en .
+
+skill:Effect a owl:Class ;
+    rdfs:label "Effect"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A postcondition/effect produced by a Skill, expressed over core:State via skill:refersToState. The plain skill:hasPostcondition (Skill→State) shortcut is retained."@en .
+
+skill:Postcondition a owl:Class ;
+    rdfs:label "Postcondition"@en ;
+    owl:equivalentClass skill:Effect ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "Alias of skill:Effect using the HHM-Core name 'Postcondition'. The reified postcondition target of skill:hasPostcondition."@en .
+
+skill:refersToState a owl:ObjectProperty ;
+    rdfs:label "refersToState"@en ;
+    rdfs:domain core:LogicalEntity ;
+    rdfs:range  core:State ;
+    rdfs:comment "Links a Precondition or Effect to the core:State it constrains/produces."@en .
+
+#################################################################
+# PROTOCOL-NEUTRAL SKILL INTERFACE & SERVICE
+#
+# HHM-Core SkillInterface (contract) + SkillService (CSS Service).
+# Concrete adapters specialise SkillInterface — e.g. in opcua.ttl
+# opcua:OpcUaSkillInterface rdfs:subClassOf skill:SkillInterface.
+#################################################################
+
+skill:SkillInterface a owl:Class ;
+    rdfs:label "SkillInterface"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A protocol-neutral contract through which a Skill is invoked. Protocol-specific interfaces (OPC UA, REST, DTDL, AAS) are subclasses."@en .
+
+skill:SkillService a owl:Class ;
+    rdfs:label "SkillService"@en ;
+    rdfs:subClassOf core:LogicalEntity ;
+    rdfs:comment "A service abstraction (CSS Service) that exposes one or more SkillInterfaces. Mirrors HHM-Core SkillService."@en .
+
+skill:hasInterfaceContract a owl:ObjectProperty ;
+    rdfs:label "hasInterfaceContract"@en ;
+    rdfs:domain core:Skill ;
+    rdfs:range  skill:SkillInterface ;
+    rdfs:comment "A Skill exposes a protocol-neutral SkillInterface contract."@en .
+
+skill:exposesInterface a owl:ObjectProperty ;
+    rdfs:label "exposesInterface"@en ;
+    rdfs:domain skill:SkillService ;
+    rdfs:range  skill:SkillInterface ;
+    rdfs:comment "A SkillService exposes a SkillInterface."@en .

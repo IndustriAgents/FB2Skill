@@ -13,6 +13,7 @@ interface FormState {
   namespace_index: number;
   only: string;
   opcua_xml_rel_path: string;
+  ontology: string;
 }
 
 const DEFAULTS: FormState = {
@@ -22,6 +23,7 @@ const DEFAULTS: FormState = {
   namespace_index: 2,
   only: "",
   opcua_xml_rel_path: "",
+  ontology: "maestro",
 };
 
 export default function ConvertPage() {
@@ -83,8 +85,9 @@ export default function ConvertPage() {
             <em>Convert</em> project to skills
           </h1>
           <p className="view-sub">
-            Upload an IEC 61499 project zip and render one CaSk skill TTL per
-            detected <code>BasicSKILL</code> function block.
+            Upload an IEC 61499 project zip and render one skill TTL per
+            detected <code>BasicSKILL</code> function block, in the CaSkMan or
+            MAESTRO vocabulary.
           </p>
         </div>
         <div className="view-actions" style={{ display: "flex", gap: 8 }}>
@@ -153,6 +156,15 @@ export default function ConvertPage() {
                 onChange={(v) => setForm({ ...form, base_iri: v })}
                 wide
               />
+              <SelectField
+                label="Target ontology"
+                value={form.ontology}
+                onChange={(v) => setForm({ ...form, ontology: v })}
+                options={[
+                  { value: "maestro", label: "MAESTRO (default)" },
+                  { value: "caskman", label: "CaSkMan" },
+                ]}
+              />
               <Field
                 label="Only (CSV filter)"
                 value={form.only}
@@ -213,48 +225,52 @@ export default function ConvertPage() {
               >
                 Conversion output will appear here.
               </div>
-            ) : result.skills.length === 0 ? (
-              <div
-                style={{
-                  padding: "40px 24px",
-                  textAlign: "center",
-                  color: "var(--cream-dim)",
-                  fontSize: 13,
-                }}
-              >
-                No BasicSKILL function blocks were rendered.
-              </div>
             ) : (
               <>
-                <div
-                  className="tabs"
-                  style={{ padding: "0 16px", borderBottom: "1px solid var(--line)" }}
-                >
-                  {result.skills.map((s) => (
-                    <button
-                      key={s.name}
-                      type="button"
-                      onClick={() => setActiveSkill(s.name)}
-                      className={`tab${activeSkill === s.name ? " is-active" : ""}`}
+                {result.skills.length === 0 ? (
+                  <div
+                    style={{
+                      padding: "40px 24px",
+                      textAlign: "center",
+                      color: "var(--cream-dim)",
+                      fontSize: 13,
+                    }}
+                  >
+                    No BasicSKILL function blocks were rendered.
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className="tabs"
+                      style={{ padding: "0 16px", borderBottom: "1px solid var(--line)" }}
                     >
-                      {s.name}
-                    </button>
-                  ))}
-                </div>
-                <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
-                  {activeTtl && <TtlViewer ttl={activeTtl} maxHeight="58vh" />}
-                  {activeSkill && activeTtl && (
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                      <button
-                        type="button"
-                        className="btn is-sm"
-                        onClick={() => download(activeSkill, activeTtl)}
-                      >
-                        Download {activeSkill}.ttl
-                      </button>
+                      {result.skills.map((s) => (
+                        <button
+                          key={s.name}
+                          type="button"
+                          onClick={() => setActiveSkill(s.name)}
+                          className={`tab${activeSkill === s.name ? " is-active" : ""}`}
+                        >
+                          {s.name}
+                        </button>
+                      ))}
                     </div>
-                  )}
-                </div>
+                    <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+                      {activeTtl && <TtlViewer ttl={activeTtl} maxHeight="58vh" />}
+                      {activeSkill && activeTtl && (
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <button
+                            type="button"
+                            className="btn is-sm"
+                            onClick={() => download(activeSkill, activeTtl)}
+                          >
+                            Download {activeSkill}.ttl
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
                 {result.failures.length > 0 && (
                   <details
                     style={{
@@ -327,6 +343,33 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
       />
+    </div>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+  wide,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  wide?: boolean;
+}) {
+  return (
+    <div className="field" style={wide ? { gridColumn: "1 / -1" } : undefined}>
+      <label>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
