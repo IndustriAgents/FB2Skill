@@ -1,0 +1,29 @@
+# -----------------------------------------------------------------------------
+# What is in the repository, graph by graph.
+#
+# Shows every named graph with its triple count and how many skills it holds,
+# so you can tell fb2skill skill graphs apart from pushed ontologies and from
+# anything else that ended up in the repository.
+# -----------------------------------------------------------------------------
+
+PREFIX core: <https://w3id.org/maestro/core#>
+PREFIX CSS:  <http://www.w3id.org/hsu-aut/css#>
+
+SELECT ?graph ?triples ?skills
+WHERE {
+  {
+    SELECT ?graph (COUNT(*) AS ?triples)
+    WHERE { GRAPH ?graph { ?s ?p ?o } }
+    GROUP BY ?graph
+  }
+  {
+    SELECT ?graph (COUNT(DISTINCT ?skill) AS ?skills)
+    WHERE {
+      GRAPH ?graph { ?s ?p ?o }
+      OPTIONAL { GRAPH ?graph { ?skill a core:Skill } }
+      OPTIONAL { GRAPH ?graph { ?skill a CSS:Skill } }
+    }
+    GROUP BY ?graph
+  }
+}
+ORDER BY ?graph

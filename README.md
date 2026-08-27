@@ -49,6 +49,33 @@ docker compose -f packages/fb2skill-rest/docker-compose.yml up --build
 
 The deployment OPC UA file (`System.<resource>.opcua.xml` under `bin/Deploy/**/`) is auto-detected; override with `--opcua-xml` (CLI) or the `opcua_xml_rel_path` form field (REST).
 
+## GraphDB integration
+
+The web UI (**Tools → GraphDB**) connects to an Ontotext GraphDB server so rendered skills and the bundled
+ontologies can be pushed straight into a repository, and Turtle can be downloaded back out of it.
+
+- Connection details (URL, repository id, optional username/password) are entered in the UI and sent with
+  every request; the server stores nothing. The password is kept in browser session storage only if
+  "Keep password for this browser session" is ticked.
+- **Upload settings**: a named-graph template (`{name}` = skill name; default `urn:fb2skill:skill:{name}`,
+  empty = default graph) and a mode — *Append* adds triples, *Replace* clears the target graph first.
+- Buttons: *Push all / Push <skill>* on the Convert page, *Push to GraphDB* on the Ontology page
+  (graph `urn:fb2skill:ontology:<id>`), and *Download .ttl* (whole repository or one named graph) on the
+  GraphDB page. *Download all (.zip)* on the Convert page now returns one zip from the server.
+
+REST endpoints (JSON bodies; see `/docs`):
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /graphdb/test` | reachability, credentials, repository health, repository list |
+| `POST /graphdb/graphs` | named graphs in the repository |
+| `POST /graphdb/push` | upload Turtle items (`ttl` or bundled `ontology_file`) with `mode` append/replace and per-item `graph` |
+| `POST /graphdb/export` | download a graph / the repository as `text/turtle` |
+| `POST /export/skill`, `POST /export/skills.zip` | server-side downloads of rendered skills |
+
+Security note: the backend opens outbound HTTP(S) connections to the user-supplied GraphDB URL, so run
+`fb2skill-rest` on a trusted network only.
+
 ## Testing
 
 ```

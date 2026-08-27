@@ -5,46 +5,9 @@ import pytest
 
 from fb2skill_core.verify import diff_report, graphs_isomorphic, parse_file, parse_ttl
 
-from .conftest import requires_festo
+from .conftest import requires_festo  # noqa: F401
 
-_DEMO_FBT = """<?xml version="1.0" encoding="UTF-8"?>
-<FBType Name="skDemo">
-  <InterfaceList>
-    <InputVars><VarDeclaration Name="Speed" Type="REAL"/></InputVars>
-    <OutputVars><VarDeclaration Name="Done" Type="BOOL"/></OutputVars>
-  </InterfaceList>
-  <FBNetwork><FB Name="Skill_Commands" Type="BasicSKILL"/></FBNetwork>
-</FBType>
-"""
-
-_DEMO_OPCUA_XML = """<?xml version="1.0" encoding="utf-8"?>
-<UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd">
-  <UAObject NodeId="ns=1;g=11111111-1111-1111-1111-111111111111" BrowseName="1:skDemo"/>
-  <UAVariable NodeId="ns=1;g=22222222-2222-2222-2222-222222222222" BrowseName="1:SKILL_CMD" DataType="Int32">
-    <Extensions><Extension><RTAddress xmlns="">V1;Path=PLC1.RES0.skDemo.Skill_Commands.IThis.SKILL_CMD;Trigger=INPUT</RTAddress></Extension></Extensions>
-  </UAVariable>
-  <UAVariable NodeId="ns=1;g=33333333-3333-3333-3333-333333333333" BrowseName="1:CURRENT_STATE" DataType="Int32">
-    <Extensions><Extension><RTAddress xmlns="">V1;Path=PLC1.RES0.skDemo.Skill_Commands.IThis.CURRENT_STATE</RTAddress></Extension></Extensions>
-  </UAVariable>
-  <UAVariable NodeId="ns=1;g=44444444-4444-4444-4444-444444444444" BrowseName="1:Speed" DataType="Float">
-    <Extensions><Extension><RTAddress xmlns="">V1;Path=PLC1.RES0.skDemo.Skill_Commands.IThis.Speed;Trigger=INPUT</RTAddress></Extension></Extensions>
-  </UAVariable>
-  <UAVariable NodeId="ns=1;g=55555555-5555-5555-5555-555555555555" BrowseName="1:Done" DataType="Boolean">
-    <Extensions><Extension><RTAddress xmlns="">V1;Path=PLC1.RES0.skDemo.Skill_Commands.IThis.Done</RTAddress></Extension></Extensions>
-  </UAVariable>
-</UANodeSet>
-"""
-
-
-@pytest.fixture
-def demo_zip() -> bytes:
-    """Minimal synthetic project: one BasicSKILL fbt + deployment OPC UA XML."""
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w") as zf:
-        zf.writestr("DemoProj/skDemo.fbt", _DEMO_FBT)
-        zf.writestr("DemoProj/bin/Deploy/PLC1/System.demo.opcua.xml", _DEMO_OPCUA_XML)
-    return buf.getvalue()
-
+# demo_zip fixture lives in conftest.py
 
 _DEMO_FIELDS = {
     "endpoint_url": "opc.tcp://x:4840",

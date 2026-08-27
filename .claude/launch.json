@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "fb2skill-rest",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "fb2skill-rest"],
+      "port": 8000
+    },
+    {
+      "name": "fb2skill-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "packages/fb2skill-web", "run", "dev"],
+      "port": 5173
+    }
+  ]
+}

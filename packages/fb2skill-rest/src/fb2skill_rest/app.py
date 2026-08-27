@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .routers import convert, health, ontology, skills
+from .routers import convert, export, graphdb, health, ontology, skills
 from .settings import Settings
 
 
@@ -25,6 +25,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(convert.router)
     app.include_router(skills.router)
     app.include_router(ontology.router)
+    app.include_router(graphdb.router)
+    app.include_router(export.router)
 
     dist = s.effective_web_dist
     if dist is not None:

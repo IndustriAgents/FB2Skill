@@ -2,8 +2,9 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { health } from "../api/client";
+import { useGraphDb } from "../state/graphdb";
 
-type IconKey = "convert" | "discover" | "ontology" | "visualize";
+type IconKey = "convert" | "discover" | "graphdb" | "ontology" | "visualize";
 
 interface NavItem {
   to: string;
@@ -25,6 +26,13 @@ const ICONS: Record<IconKey | "search" | "bell", JSX.Element> = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
       <circle cx="11" cy="11" r="7" />
       <path d="m21 21-4.3-4.3" />
+    </svg>
+  ),
+  graphdb: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <ellipse cx="12" cy="5.5" rx="7" ry="2.5" />
+      <path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13" />
+      <path d="M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5" />
     </svg>
   ),
   ontology: (
@@ -61,6 +69,7 @@ const ICONS: Record<IconKey | "search" | "bell", JSX.Element> = {
 const navItems: NavItem[] = [
   { to: "/", label: "Convert", section: "tools", icon: "convert", end: true },
   { to: "/discover", label: "Discover", section: "tools", icon: "discover" },
+  { to: "/graphdb", label: "GraphDB", section: "tools", icon: "graphdb" },
   { to: "/ontology", label: "Ontology", section: "reference", icon: "ontology" },
   { to: "/visualize", label: "State machine", section: "reference", icon: "visualize" },
 ];
@@ -68,6 +77,7 @@ const navItems: NavItem[] = [
 const pageMeta: Record<string, { title: string; crumb: string }> = {
   "/": { title: "Convert", crumb: "Tools · Convert" },
   "/discover": { title: "Discover", crumb: "Tools · Discover" },
+  "/graphdb": { title: "GraphDB", crumb: "Tools · GraphDB" },
   "/ontology": { title: "Ontologies", crumb: "Reference · Ontologies" },
   "/visualize": { title: "ISA-88 state machine", crumb: "Reference · State machine" },
 };
@@ -78,15 +88,16 @@ interface Connection {
   state: "ok" | "warn" | "alert";
 }
 
-const CONNECTIONS: Connection[] = [
-  { name: "fb2skill API", detail: "REST", state: "ok" },
-  { name: "OPC UA broker", detail: "4840", state: "ok" },
-  { name: "Ontologies", detail: "MAESTRO · CaSkMan", state: "ok" },
-];
+const ONTOLOGY_CONN: Connection = {
+  name: "Ontologies",
+  detail: "MAESTRO · CaSkMan",
+  state: "ok",
+};
 
 export default function Layout() {
   const location = useLocation();
   const [healthy, setHealthy] = useState<boolean | null>(null);
+  const gdb = useGraphDb();
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +123,19 @@ export default function Layout() {
     detail: healthy === null ? "checking…" : healthy ? "healthy" : "unreachable",
     state: healthy === null ? "warn" : healthy ? "ok" : "alert",
   };
-  const conns: Connection[] = [apiConn, ...CONNECTIONS.slice(1)];
+  const gdbConn: Connection = {
+    name: "GraphDB",
+    detail:
+      gdb.status === "unconfigured"
+        ? "not configured"
+        : gdb.status === "untested"
+        ? `${gdb.connection.repository} · untested`
+        : gdb.status === "ok"
+        ? gdb.connection.repository
+        : "error",
+    state: gdb.status === "ok" ? "ok" : gdb.status === "error" ? "alert" : "warn",
+  };
+  const conns: Connection[] = [apiConn, gdbConn, ONTOLOGY_CONN];
 
   return (
     <div className="app">

@@ -1,0 +1,41 @@
+# -----------------------------------------------------------------------------
+# DRY RUN for 11-remove-skill-triples.ru
+#
+# Lists exactly the triples that the triple-scoped delete would remove, so you
+# can eyeball them before deleting anything. Same skill name, same FILTER --
+# only the operation differs (SELECT here, DELETE there).
+#
+# A skill's footprint is its own individual plus every individual fb2skill
+# derives from it by name (<skill>_Interface, <skill>_StateMachine,
+# <skill>_Param_*, <skill>_SkillCommand, ...), in either subject or object
+# position. Object position matters: it is what unlinks the shared Resource
+# individual (CSS:providesSkill / core:provides) without deleting the Resource
+# itself, which other skills still need.
+#
+# EDIT the skill name on the BIND line. As shipped it matches nothing.
+# -----------------------------------------------------------------------------
+
+PREFIX core: <https://w3id.org/maestro/core#>
+PREFIX CSS:  <http://www.w3id.org/hsu-aut/css#>
+
+SELECT ?g ?s ?p ?o
+WHERE {
+  {
+    SELECT ?iri
+    WHERE {
+      #        vvvvvvvvvvvv  <-- the skill you want
+      BIND("skREPLACE_ME" AS ?skillName)
+      GRAPH ?skillGraph { ?skill a ?skillClass }
+      FILTER(?skillClass IN (core:Skill, CSS:Skill))
+      FILTER(STRENDS(STR(?skill), CONCAT("#", ?skillName)))
+      BIND(STR(?skill) AS ?iri)
+    }
+  }
+  GRAPH ?g { ?s ?p ?o }
+  FILTER(
+       STR(?s) = ?iri
+    || STRSTARTS(STR(?s), CONCAT(?iri, "_"))
+    || (isIRI(?o) && (STR(?o) = ?iri || STRSTARTS(STR(?o), CONCAT(?iri, "_"))))
+  )
+}
+ORDER BY ?g ?s ?p

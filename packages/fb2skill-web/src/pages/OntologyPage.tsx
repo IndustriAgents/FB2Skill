@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { fetchOntologies, fetchOntologyFile } from "../api/client";
-import type { OntologyInfo } from "../types/api";
+import type { OntologyInfo, PushItemResult } from "../types/api";
+import PushToGraphDbButton, { PushResultList } from "../components/PushToGraphDbButton";
 import TtlViewer from "../components/TtlViewer";
 
 export default function OntologyPage() {
@@ -10,6 +11,8 @@ export default function OntologyPage() {
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [ttl, setTtl] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [pushResults, setPushResults] = useState<PushItemResult[] | null>(null);
+  const [pushErr, setPushErr] = useState<string | null>(null);
 
   const current = ontologies?.find((o) => o.id === selected) ?? null;
 
@@ -104,13 +107,34 @@ export default function OntologyPage() {
               ))}
             </div>
           )}
-          {ttl && (
-            <button type="button" className="btn" onClick={download}>
-              Download .ttl
-            </button>
+          {ttl && activeFile && (
+            <>
+              <PushToGraphDbButton
+                items={[
+                  {
+                    name: activeFile.split("/").pop()!,
+                    graph: `urn:fb2skill:ontology:${selected}`,
+                    ontology_file: { ontology_id: selected, file_path: activeFile },
+                  },
+                ]}
+                onDone={(r, e) => {
+                  setPushResults(r);
+                  setPushErr(e);
+                }}
+              />
+              <button type="button" className="btn" onClick={download}>
+                Download .ttl
+              </button>
+            </>
           )}
         </div>
       </div>
+
+      {(pushResults || pushErr) && (
+        <div style={{ marginBottom: 16 }}>
+          <PushResultList results={pushResults} error={pushErr} />
+        </div>
+      )}
 
       {err && (
         <div

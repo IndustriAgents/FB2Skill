@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------------
+# Everything one skill declares: interface, state machine, parameters, outputs.
+#
+# EDIT the skill name on the BIND line below, then run.
+# Works for both MAESTRO and CaSkMan skills.
+#
+# The skill is matched on the local name of its IRI (the part after "#") rather
+# than on a label -- the CaSkMan template does not emit rdfs:label on the skill
+# individual, so label matching would silently return nothing.
+# -----------------------------------------------------------------------------
+
+PREFIX core:    <https://w3id.org/maestro/core#>
+PREFIX mskill:  <https://w3id.org/maestro/skill#>
+PREFIX mopcua:  <https://w3id.org/maestro/opcua#>
+PREFIX mstate:  <https://w3id.org/maestro/state#>
+PREFIX CSS:     <http://www.w3id.org/hsu-aut/css#>
+PREFIX CaSk:    <http://www.w3id.org/hsu-aut/cask#>
+PREFIX OpcUa:   <http://www.w3id.org/hsu-aut/OpcUa#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?graph ?skill ?kind ?item ?label ?nodeId
+WHERE {
+  #        vvvvvvvv  <-- the skill you want
+  BIND("skLoad" AS ?skillName)
+
+  GRAPH ?graph {
+    ?skill a ?skillClass .
+    FILTER(?skillClass IN (core:Skill, CSS:Skill))
+    FILTER(STRENDS(STR(?skill), CONCAT("#", ?skillName)))
+
+    {
+      ?skill mskill:hasInterfaceContract|CSS:accessibleThrough ?item .
+      BIND("1 interface" AS ?kind)
+    }
+    UNION
+    {
+      ?skill mstate:hasStateMachine|CSS:behaviorConformsTo ?item .
+      BIND("2 state machine" AS ?kind)
+    }
+    UNION
+    {
+      ?skill mskill:hasParameterDef|CSS:hasParameter ?item .
+      BIND("3 parameter" AS ?kind)
+    }
+    UNION
+    {
+      ?skill CaSk:hasSkillOutput ?item .
+      BIND("4 output" AS ?kind)
+    }
+
+    OPTIONAL { ?item rdfs:label ?label }
+    OPTIONAL { ?item mopcua:nodeId|OpcUa:nodeId ?nodeId }
+  }
+}
+ORDER BY ?kind ?item

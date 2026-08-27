@@ -1,0 +1,14 @@
+# -----------------------------------------------------------------------------
+# DRY RUN for 12-remove-all-skills.ru
+#
+# Same FILTER as the bulk delete, but only counts. Every graph listed here
+# would be emptied. Change the prefix in both files together.
+# -----------------------------------------------------------------------------
+
+SELECT ?g (COUNT(*) AS ?triplesThatWouldBeDeleted)
+WHERE {
+  GRAPH ?g { ?s ?p ?o }
+  FILTER(STRSTARTS(STR(?g), "urn:fb2skill:skill:"))
+}
+GROUP BY ?g
+ORDER BY ?g

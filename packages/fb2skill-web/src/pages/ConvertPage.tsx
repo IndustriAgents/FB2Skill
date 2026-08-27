@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-import { ApiError, convertProject } from "../api/client";
-import type { ConvertResponse } from "../types/api";
+import {
+  ApiError,
+  convertProject,
+  exportSkill,
+  exportSkillsZip,
+  saveBlob,
+} from "../api/client";
+import type { ConvertResponse, PushItemResult } from "../types/api";
+import PushToGraphDbButton, { PushResultList } from "../components/PushToGraphDbButton";
 import TtlViewer from "../components/TtlViewer";
 import ZipUploader from "../components/ZipUploader";
 
@@ -36,6 +43,13 @@ export default function ConvertPage() {
   const [err, setErr] = useState<string | null>(null);
   const [result, setResult] = useState<ConvertResponse | null>(null);
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
+  const [pushResults, setPushResults] = useState<PushItemResult[] | null>(null);
+  const [pushErr, setPushErr] = useState<string | null>(null);
+
+  function onPushDone(results: PushItemResult[] | null, error: string | null) {
+    setPushResults(results);
+    setPushErr(error);
+  }
 
   useEffect(() => {
     if (handoff?.only) setForm((f) => ({ ...f, only: handoff.only! }));
@@ -49,6 +63,8 @@ export default function ConvertPage() {
     setBusy(true);
     setErr(null);
     setResult(null);
+    setPushResults(null);
+    setPushErr(null);
     try {
       const r = await convertProject(file, form);
       setResult(r);
@@ -60,19 +76,23 @@ export default function ConvertPage() {
     }
   }
 
-  function download(name: string, ttl: string) {
-    const blob = new Blob([ttl], { type: "text/turtle" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${name}.ttl`;
-    a.click();
-    URL.revokeObjectURL(url);
+  async function download(name: string, ttl: string) {
+    try {
+      const f = await exportSkill(name, ttl);
+      saveBlob(f.blob, f.filename);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : String(e));
+    }
   }
 
-  function downloadAll() {
-    if (!result) return;
-    result.skills.forEach((s) => download(s.name, s.ttl));
+  async function downloadAll() {
+    if (!result || result.skills.length === 0) return;
+    try {
+      const f = await exportSkillsZip({ skills: result.skills });
+      saveBlob(f.blob, f.filename);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.message : String(e));
+    }
   }
 
   const activeTtl = result?.skills.find((s) => s.name === activeSkill)?.ttl;
@@ -92,9 +112,16 @@ export default function ConvertPage() {
         </div>
         <div className="view-actions" style={{ display: "flex", gap: 8 }}>
           {result && result.skills.length > 0 && (
-            <button type="button" className="btn" onClick={downloadAll}>
-              Download all .ttl
-            </button>
+            <>
+              <button type="button" className="btn" onClick={downloadAll}>
+                Download all (.zip)
+              </button>
+              <PushToGraphDbButton
+                items={result.skills.map((s) => ({ name: s.name, ttl: s.ttl }))}
+                label={`Push all ${result.skills.length} to GraphDB`}
+                onDone={onPushDone}
+              />
+            </>
           )}
           <button
             type="button"
@@ -258,7 +285,13 @@ export default function ConvertPage() {
                     <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                       {activeTtl && <TtlViewer ttl={activeTtl} maxHeight="58vh" />}
                       {activeSkill && activeTtl && (
-                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                          <PushToGraphDbButton
+                            small
+                            items={[{ name: activeSkill, ttl: activeTtl }]}
+                            label={`Push ${activeSkill}`}
+                            onDone={onPushDone}
+                          />
                           <button
                             type="button"
                             className="btn is-sm"
@@ -268,6 +301,7 @@ export default function ConvertPage() {
                           </button>
                         </div>
                       )}
+                      <PushResultList results={pushResults} error={pushErr} />
                     </div>
                   </>
                 )}

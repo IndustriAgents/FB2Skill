@@ -1,0 +1,66 @@
+# -----------------------------------------------------------------------------
+# Which skills are uploaded in GraphDB?
+#
+# One row per skill, covering BOTH target vocabularies fb2skill can emit:
+#   MAESTRO  -> core:Skill   (https://w3id.org/maestro/core#Skill)
+#   CaSkMan  -> CSS:Skill    (http://www.w3id.org/hsu-aut/css#Skill)
+#
+# ?graph is the named graph the skill was pushed into. With the default
+# fb2skill template that is urn:fb2skill:skill:<name>, but this query does not
+# assume it -- skills pushed into the default graph show up with ?graph unbound.
+# -----------------------------------------------------------------------------
+
+PREFIX core:    <https://w3id.org/maestro/core#>
+PREFIX mskill:  <https://w3id.org/maestro/skill#>
+PREFIX mopcua:  <https://w3id.org/maestro/opcua#>
+PREFIX mcom:    <https://w3id.org/maestro/communication#>
+PREFIX CSS:     <http://www.w3id.org/hsu-aut/css#>
+PREFIX CaSk:    <http://www.w3id.org/hsu-aut/cask#>
+PREFIX OpcUa:   <http://www.w3id.org/hsu-aut/OpcUa#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?skill ?vocabulary ?graph ?resource ?nodeId ?endpointUrl
+WHERE {
+  {
+    # --- MAESTRO ---------------------------------------------------------
+    GRAPH ?graph { ?skill a core:Skill }
+    BIND("MAESTRO" AS ?vocabulary)
+    OPTIONAL { GRAPH ?graph { ?resource core:provides ?skill } }
+    OPTIONAL {
+      GRAPH ?graph {
+        ?skill mopcua:accessibleThrough ?iface .
+        ?iface mopcua:nodeId ?nodeId .
+      }
+    }
+    OPTIONAL {
+      GRAPH ?graph {
+        ?skill mopcua:accessibleThrough ?iface .
+        ?iface mcom:exposedVia ?endpoint .
+        ?endpoint mcom:address ?endpointUrl .
+      }
+    }
+  }
+  UNION
+  {
+    # --- CaSkMan ---------------------------------------------------------
+    GRAPH ?graph { ?skill a CSS:Skill }
+    BIND("CaSkMan" AS ?vocabulary)
+    OPTIONAL { GRAPH ?graph { ?resource CSS:providesSkill ?skill } }
+    OPTIONAL {
+      GRAPH ?graph {
+        ?skill CSS:accessibleThrough ?iface .
+        ?iface OpcUa:nodeId ?nodeId .
+      }
+    }
+    OPTIONAL {
+      GRAPH ?graph {
+        ?skill CSS:accessibleThrough ?iface .
+        ?nodeSet OpcUa:containsNode ?iface .
+        ?server  OpcUa:hasNodeSet ?nodeSet ;
+                 OpcUa:hasEndpointDescription ?endpoint .
+        ?endpoint OpcUa:hasEndpointUrl ?endpointUrl .
+      }
+    }
+  }
+}
+ORDER BY ?skill
