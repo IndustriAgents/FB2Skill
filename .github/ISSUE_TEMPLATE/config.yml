@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Monorepo layout
+    url: https://github.com/IndustriAgents/FB2Skill/blob/main/docs/monorepo-layout.md
+    about: Which package a change belongs in, and why the web frontend sits outside the uv workspace.
+  - name: How this differs from PLC2Skill
+    url: https://github.com/IndustriAgents/FB2Skill/blob/main/docs/divergence-from-plc2skill.md
+    about: Engine-level comparison with the IEC 61131-10 original. Most "why not do it like PLC2Skill?" answers are here.
+  - name: MAESTRO ontology
+    url: https://github.com/IndustriAgents/MAESTRO
+    about: Questions about the target ontology itself, rather than the conversion.
+  - name: Security vulnerability
+    url: https://github.com/IndustriAgents/FB2Skill/security/policy
+    about: Report privately. Please do not open a public issue.
