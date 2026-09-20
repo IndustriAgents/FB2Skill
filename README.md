@@ -1,5 +1,9 @@
 # fb2skill
 
+[![License: MIT](https://img.shields.io/github/license/IndustriAgents/FB2Skill)](LICENSE)
+[![Ontologies](https://img.shields.io/badge/ontologies-MAESTRO%20%7C%20CaSkMan-4c6ef5)](#)
+[![IEC 61499](https://img.shields.io/badge/IEC-61499-0b7285)](https://www.iec.ch/)
+
 Convert IEC 61499 function blocks into semantic skill TTL files. Two target ontologies are supported: **MAESTRO** (default, https://w3id.org/maestro) and **CaSkMan** (CaSk / ISA-88 / DINEN61360); select with `--ontology` (CLI), the `ontology` form field (REST), or the dropdown on the web Convert page.
 
 IEC 61499 counterpart of [PLC2Skill](https://github.com/hsu-aut/PLC2Skill). PLC2Skill targets IEC 61131-10 PLCopen XML and connects to a live OPC UA server; fb2skill targets `.fbt` files (nxtControl / EcoStruxure) and reads OPC UA node IDs from the deployment artifact offline.
@@ -59,3 +63,21 @@ uv run --package fb2skill-rest pytest packages/fb2skill-rest/tests
 ```
 
 Tests requiring the FESTO example project at `D:\FESTO_DS_skills\IEC61499` are auto-skipped when that path is absent.
+
+## Contributing
+
+Contributions are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers the
+workspace layout, how to run the tests, and which of the four packages a change
+belongs in — the usual rework is domain logic that landed in an adapter rather
+than in `fb2skill-core`. Please also read the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Security
+
+`fb2skill-rest` parses uploaded engineering projects and has no authentication
+of its own. [SECURITY.md](SECURITY.md) explains what that means and how to
+report a vulnerability privately.
+
+## License
+
+Released under the [MIT License](LICENSE).
